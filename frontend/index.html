@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - Despachante Guaxupé</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/processos.css" />
+</head>
+<body>
+
+  <button class="btn-menu-mobile" onclick="toggleMenu()">&#9776;</button>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="fecharMenu()"></div>
+
+  <div class="sidebar">
+    <div class="logo">Despachante <span>Guaxupé</span></div>
+    <nav>
+      <a href="index.html" class="active"><span>-</span>Dashboard</a>
+      <a href="clientes.html"><span>-</span>Clientes</a>
+      <a href="veiculos.html"><span>-</span>Veículos</a>
+      <a href="processos.html"><span>-</span>Processos</a>
+    </nav>
+  </div>
+
+  <div class="main">
+    <div class="topo">
+      <div>
+        <h1>Dashboard</h1>
+        <p class="subtitulo">Aqui está o resumo do dia.</p>
+      </div>
+      <button class="btn-primary btn-gerar-link" onclick="gerarLinkPortal()">
+        Gerar Link para Cliente
+      </button>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="numero" id="totalClientes">--</div>
+        <div class="label">Clientes Cadastrados</div>
+      </div>
+      <div class="card">
+        <div class="numero" id="totalVeiculos">--</div>
+        <div class="label">Veículos Cadastrados</div>
+      </div>
+      <div class="card aviso">
+        <div class="numero" id="totalAbertos">--</div>
+        <div class="label">Processos em Aberto</div>
+      </div>
+      <div class="card alerta">
+        <div class="numero" id="totalAlertas">--</div>
+        <div class="label">Vencem em 30 dias</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Processos com Prazo Próximo</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Tipo</th>
+            <th>Placa</th>
+            <th>Vencimento</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaAlertas">
+          <tr><td colspan="5" class="vazio">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section" style="margin-top: 24px;">
+      <h2>Solicitações do Portal</h2>
+      <div id="listaSolicitacoes">
+        <p class="vazio">Carregando...</p>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modalLink">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Link Gerado!</h2>
+          <button class="modal-fechar" onclick="fecharModalLink()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="color:#666; font-size:13px; margin-bottom:16px;">
+            Copie o link abaixo e envie para o cliente via WhatsApp.
+          </p>
+          <div class="link-box">
+            <input type="text" id="linkGerado" readonly />
+            <button class="btn-copiar" onclick="copiarLink()">Copiar</button>
+          </div>
+          <div id="linkCopiado" style="display:none; color:#0f5132; font-size:13px; margin-top:8px;">
+            Link copiado com sucesso!
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-primary" onclick="fecharModalLink()">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modalDocs">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Documentos Enviados</h2>
+          <button class="modal-fechar" onclick="fecharModalDocs()">&times;</button>
+        </div>
+        <div class="modal-body" id="docsConteudo"></div>
+        <div class="modal-footer">
+          <button class="btn-primary" onclick="fecharModalDocs()">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/dashboard.js"></script>
+  <script>
+    function toggleMenu() {
+      document.querySelector('.sidebar').classList.toggle('aberta');
+      document.getElementById('sidebarOverlay').classList.toggle('ativo');
+    }
+    function fecharMenu() {
+      document.querySelector('.sidebar').classList.remove('aberta');
+      document.getElementById('sidebarOverlay').classList.remove('ativo');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+ALTER TABLE portal_solicitacoes ADD COLUMN IF NOT EXISTS nome_cliente VARCHAR(100);

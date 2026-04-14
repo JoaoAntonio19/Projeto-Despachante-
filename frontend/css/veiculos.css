@@ -1,0 +1,75 @@
+select {
+  padding: 9px 12px;
+  border: 1px solid #dde3ea;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+  width: 100%;
+  background: #fff;
+  color: #333;
+}
+select:focus { border-color: #4da6ff; }
+
+.veiculo-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.veiculo-icone {
+  display: none;
+}
+
+.badge-placa {
+  background: #1a3a5c;
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  display: inline-block;
+}
+
+.veiculo-marca {
+  font-size: 14px;
+  color: #010f36;
+  margin-top: 2px;
+}
+
+.badge-cor {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+  background: #f0f4f8;
+  color: #555;
+}
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 999;
+  justify-content: center;
+  align-items: center;
+}
+.modal-overlay.ativo { display: flex; }
+
+.btn-icone.detran {
+  background: #e8f4fd;
+  color: #0a558c;
+  font-weight: bold;
+  font-size: 10px;
+}
+.btn-icone.detran:hover { background: #bee3f8; }
+
+.btn-icone.detran2 {
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: bold;
+  font-size: 10px;
+}
+.btn-icone.detran2:hover { background: #fde68a; }
