@@ -1,0 +1,28 @@
+.cliente-info { display: flex; align-items: center; gap: 10px; }
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #EFF6FF;
+  color: #2563EB;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cliente-nome { font-weight: 600; color: #0F172A; font-size: 14px; }
+.cliente-cpf  { font-size: 12px; color: #64748B; }
+
+.badge-cidade {
+  background: #F1F5F9;
+  color: #475569;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}

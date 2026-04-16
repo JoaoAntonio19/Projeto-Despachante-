@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Processos - Despachante Guaxupé</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/processos.css" />
+</head>
+<body>
+
+<button class="btn-menu-mobile" onclick="toggleMenu()">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="fecharMenu()"></div>
+
+<div class="sidebar">
+  <div class="logo">Despachante <span>Guaxupé</span></div>
+  <nav>
+    <a href="index.html">Dashboard</a>
+    <a href="clientes.html">Clientes</a>
+    <a href="veiculos.html">Veículos</a>
+    <a href="processos.html" class="active">Processos</a>
+  </nav>
+  <div class="sidebar-rodape">Sistema v1.0 &mdash; Guaxupé</div>
+</div>
+
+<div class="main">
+  <div class="topo">
+    <div class="topo-info">
+      <h1>Processos</h1>
+      <p class="subtitulo">Gerencie os processos e serviços em andamento.</p>
+    </div>
+    <button class="btn-primary" onclick="abrirModal()">+ Novo Processo</button>
+  </div>
+
+  <div class="section" style="margin-bottom: 20px;">
+    <input type="text" id="campoBusca" placeholder="Buscar por cliente ou tipo..." oninput="buscarProcessos()" />
+  </div>
+
+  <div class="section">
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Veículo</th>
+          <th>Tipo</th>
+          <th>Abertura</th>
+          <th>Vencimento</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaProcessos">
+        <tr><td colspan="7" class="vazio">Carregando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitulo">Novo Processo</h2>
+      <button class="modal-fechar" onclick="fecharModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="processoId" />
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Cliente *</label>
+          <select id="cliente_id" onchange="carregarVeiculosDoCliente()">
+            <option value="">Selecione o cliente</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Veículo</label>
+          <select id="veiculo_id">
+            <option value="">Selecione o veículo</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Tipo de Serviço *</label>
+          <select id="tipo">
+            <option value="">Selecione</option>
+            <option>Transferência de Veículo</option>
+            <option>Licenciamento</option>
+            <option>Emplacamento</option>
+            <option>Baixa de Veículo</option>
+            <option>Comunicado de Venda</option>
+            <option>Alteração de Dados</option>
+            <option>2ª Via de Documento</option>
+            <option>Outros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Data de Abertura *</label>
+          <input type="date" id="data_abertura" />
+        </div>
+        <div class="form-group">
+          <label>Data de Vencimento</label>
+          <input type="date" id="data_vencimento" />
+        </div>
+        <div class="form-group full">
+          <label>Status</label>
+          <select id="status">
+            <option value="aberto">Aberto</option>
+            <option value="em_andamento">Em Andamento</option>
+            <option value="concluido">Concluído</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Observações</label>
+          <textarea id="observacoes" rows="3" placeholder="Informações adicionais..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secundario" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-primary" onclick="salvarProcesso()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalChecklist">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="checklistTitulo">Checklist de Documentos</h2>
+      <button class="modal-fechar" onclick="fecharChecklist()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p id="checklistSubtitulo" style="color:#64748B; font-size:13px; margin-bottom:16px;"></p>
+      <div id="checklistItens"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secundario" onclick="fecharChecklist()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/processos.js"></script>
+<script>
+  function toggleMenu() {
+    document.querySelector('.sidebar').classList.toggle('aberta');
+    document.getElementById('sidebarOverlay').classList.toggle('ativo');
+  }
+  function fecharMenu() {
+    document.querySelector('.sidebar').classList.remove('aberta');
+    document.getElementById('sidebarOverlay').classList.remove('ativo');
+  }
+</script>
+</body>
+</html>
