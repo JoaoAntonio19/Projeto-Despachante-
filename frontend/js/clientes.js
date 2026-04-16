@@ -1,20 +1,32 @@
 const API = 'http://localhost:3000/api';
 let todosClientes = [];
 
-// Busca endereço pelo CEP automaticamente
+function getToken() {
+  return localStorage.getItem('token');
+}
+
+function getHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${getToken()}`
+  };
+}
+
+function verificarAuth(dados) {
+  if (!getToken() || (dados && dados.mensagem === 'Token inválido ou expirado')) {
+    window.location.href = '/login.html';
+    return false;
+  }
+  return true;
+}
+
 async function buscarCEP() {
   const cep = document.getElementById('cep').value.replace(/\D/g, '');
   if (cep.length !== 8) return;
-
   try {
     const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
     const dados = await res.json();
-
-    if (dados.erro) {
-      alert('CEP não encontrado. Verifique e tente novamente.');
-      return;
-    }
-
+    if (dados.erro) { alert('CEP não encontrado.'); return; }
     document.getElementById('endereco').value = `${dados.logradouro}, ${dados.bairro}`;
     document.getElementById('cidade').value = dados.localidade;
   } catch (err) {
@@ -23,9 +35,12 @@ async function buscarCEP() {
 }
 
 async function carregarClientes() {
+  if (!verificarAuth()) return;
   try {
-    const res = await fetch(`${API}/clientes`);
-    todosClientes = await res.json();
+    const res = await fetch(`${API}/clientes`, { headers: getHeaders() });
+    if (res.status === 401 || res.status === 403) { verificarAuth({ mensagem: 'Token inválido ou expirado' }); return; }
+    const dados = await res.json();
+    todosClientes = Array.isArray(dados) ? dados : [];
     renderizarTabela(todosClientes);
   } catch (err) {
     console.error('Erro ao carregar clientes:', err);
@@ -65,8 +80,7 @@ function renderizarTabela(clientes) {
 function buscarClientes() {
   const termo = document.getElementById('campoBusca').value.toLowerCase();
   const filtrados = todosClientes.filter(c =>
-    c.nome.toLowerCase().includes(termo) ||
-    c.cpf.includes(termo)
+    c.nome.toLowerCase().includes(termo) || c.cpf.includes(termo)
   );
   renderizarTabela(filtrados);
 }
@@ -110,20 +124,11 @@ async function salvarCliente() {
     endereco: document.getElementById('endereco').value,
     cidade:   document.getElementById('cidade').value,
   };
-
-  if (!dados.nome || !dados.cpf) {
-    alert('Nome e CPF são obrigatórios!');
-    return;
-  }
-
+  if (!dados.nome || !dados.cpf) { alert('Nome e CPF são obrigatórios!'); return; }
   try {
     const url = id ? `${API}/clientes/${id}` : `${API}/clientes`;
     const method = id ? 'PUT' : 'POST';
-    await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(dados),
-    });
+    await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(dados) });
     fecharModal();
     carregarClientes();
   } catch (err) {
@@ -134,7 +139,7 @@ async function salvarCliente() {
 async function deletarCliente(id) {
   if (!confirm('Tem certeza que deseja excluir este cliente?')) return;
   try {
-    await fetch(`${API}/clientes/${id}`, { method: 'DELETE' });
+    await fetch(`${API}/clientes/${id}`, { method: 'DELETE', headers: getHeaders() });
     carregarClientes();
   } catch (err) {
     console.error('Erro ao deletar cliente:', err);

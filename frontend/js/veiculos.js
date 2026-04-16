@@ -1,19 +1,32 @@
 const API = 'http://localhost:3000/api';
 let todosVeiculos = [];
 
-async function carregarVeiculos() {
-  try {
-    const [veiculos, clientes] = await Promise.all([
-      fetch(`${API}/veiculos`).then(r => r.json()),
-      fetch(`${API}/clientes`).then(r => r.json()),
-    ]);
+function getToken() { return localStorage.getItem('token'); }
+function getHeaders() {
+  return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` };
+}
+function verificarAuth() {
+  if (!getToken()) { window.location.href = '/login.html'; return false; }
+  return true;
+}
 
-    todosVeiculos = veiculos.map(v => ({
+async function carregarVeiculos() {
+  if (!verificarAuth()) return;
+  try {
+    const [resVeiculos, resClientes] = await Promise.all([
+      fetch(`${API}/veiculos`, { headers: getHeaders() }),
+      fetch(`${API}/clientes`, { headers: getHeaders() }),
+    ]);
+    if (resVeiculos.status === 401 || resVeiculos.status === 403) { window.location.href = '/login.html'; return; }
+    const veiculos = await resVeiculos.json();
+    const clientes = await resClientes.json();
+
+    todosVeiculos = (Array.isArray(veiculos) ? veiculos : []).map(v => ({
       ...v,
-      proprietario: clientes.find(c => c.id === v.cliente_id)?.nome || '--'
+      proprietario: (Array.isArray(clientes) ? clientes : []).find(c => c.id === v.cliente_id)?.nome || '--'
     }));
 
-    preencherSelectClientes(clientes);
+    preencherSelectClientes(Array.isArray(clientes) ? clientes : []);
     renderizarTabela(todosVeiculos);
   } catch (err) {
     console.error('Erro ao carregar veículos:', err);
@@ -38,7 +51,7 @@ function renderizarTabela(veiculos) {
     <tr>
       <td>
         <div class="veiculo-info">
-          <div class="veiculo-icone">🚗</div>
+          <div class="veiculo-icone">&#128663;</div>
           <div>
             <span class="badge-placa">${v.placa}</span>
             <div class="veiculo-marca">${v.marca || ''} ${v.modelo || ''}</div>
@@ -53,8 +66,8 @@ function renderizarTabela(veiculos) {
       <td>${v.proprietario}</td>
       <td>
         <div class="acoes">
-          <button class="btn-icone editar" title="Editar veículo" onclick="editarVeiculo(${v.id})">✏️</button>
-          <button class="btn-icone deletar" title="Excluir veículo" onclick="deletarVeiculo(${v.id})">✕</button>
+          <button class="btn-icone editar" title="Editar veículo" onclick="editarVeiculo(${v.id})">&#9998;</button>
+          <button class="btn-icone deletar" title="Excluir veículo" onclick="deletarVeiculo(${v.id})">&#10005;</button>
         </div>
       </td>
     </tr>
@@ -72,17 +85,8 @@ function buscarVeiculos() {
 
 function abrirModal() {
   document.getElementById('modalTitulo').textContent = 'Novo Veículo';
-  document.getElementById('veiculoId').value = '';
-  document.getElementById('cliente_id').value = '';
-  document.getElementById('placa').value = '';
-  document.getElementById('marca').value = '';
-  document.getElementById('modelo').value = '';
-  document.getElementById('renavam').value = '';
-  document.getElementById('chassi').value = '';
-  document.getElementById('categoria').value = '';
-  document.getElementById('combustivel').value = '';
-  document.getElementById('ano_modelo').value = '';
-  document.getElementById('ano_fabricacao').value = '';
+  ['veiculoId','cliente_id','placa','marca','modelo','renavam','chassi','categoria','combustivel','ano_modelo','ano_fabricacao']
+    .forEach(id => document.getElementById(id).value = '');
   document.getElementById('modalOverlay').classList.add('ativo');
 }
 
@@ -122,20 +126,11 @@ async function salvarVeiculo() {
     ano_modelo:     document.getElementById('ano_modelo').value,
     ano_fabricacao: document.getElementById('ano_fabricacao').value,
   };
-
-  if (!dados.cliente_id || !dados.placa) {
-    alert('Proprietário e placa são obrigatórios!');
-    return;
-  }
-
+  if (!dados.cliente_id || !dados.placa) { alert('Proprietário e placa são obrigatórios!'); return; }
   try {
     const url = id ? `${API}/veiculos/${id}` : `${API}/veiculos`;
     const method = id ? 'PUT' : 'POST';
-    await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(dados),
-    });
+    await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(dados) });
     fecharModal();
     carregarVeiculos();
   } catch (err) {
@@ -146,7 +141,7 @@ async function salvarVeiculo() {
 async function deletarVeiculo(id) {
   if (!confirm('Tem certeza que deseja excluir este veículo?')) return;
   try {
-    await fetch(`${API}/veiculos/${id}`, { method: 'DELETE' });
+    await fetch(`${API}/veiculos/${id}`, { method: 'DELETE', headers: getHeaders() });
     carregarVeiculos();
   } catch (err) {
     console.error('Erro ao deletar veículo:', err);
