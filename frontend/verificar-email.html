@@ -5,13 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Confirmar Email - Despachante Guaxupé</title>
   <link rel="stylesheet" href="css/login.css" />
+  <style>
+    .mensagem { padding: 20px; border-radius: 8px; margin: 20px 0; font-weight: 500; line-height: 1.5; }
+    .sucesso { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .erro { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .carregando { color: #64748b; font-style: italic; }
+    .loader { border: 3px solid #f3f3f3; border-top: 3px solid #1e3a8a; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; margin-right: 10px; vertical-align: middle; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
 </head>
 <body>
-  <div class="login-container">
-    <div class="logo">Despachante <span>Guaxupé</span></div>
-    <div id="resultado" class="mensagem"></div>
-    <p><a href="login.html">Voltar ao login</a></p>
+
+<div class="login-container">
+  <div class="logo">Despachante <span>Guaxupé</span></div>
+  
+  <div id="status-container">
+    <p class="carregando" id="status-texto">
+      <span class="loader"></span> Verificando sua conta...
+    </p>
+    <div id="resultado"></div>
   </div>
-  <script src="js/verificar-email.js"></script>
+
+  <p style="margin-top: 20px;">
+    <a href="login.html" class="btn-login" style="text-decoration: none; display: block; text-align: center; line-height: 40px;">Ir para o Login</a>
+  </p>
+</div>
+
+<script src="js/verificar-email.js"></script>
 </body>
 </html>

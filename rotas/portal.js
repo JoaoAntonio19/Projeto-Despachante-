@@ -5,6 +5,18 @@ const crypto = require('crypto');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const jwt = require('jsonwebtoken'); // Adicionamos o JWT para ler o token de segurança
+
+// Função inteligente para descobrir qual despachante está logado
+function getDespachanteId(req) {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return null;
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET).id;
+  } catch {
+    return null;
+  }
+}
 
 // Configurar upload de arquivos
 const storage = multer.diskStorage({
@@ -20,22 +32,26 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
-// Gerar link para o cliente
+// Gerar link para o cliente (AGORA SALVA O DONO DO LINK)
 router.post('/gerar-link', async (req, res) => {
+  const despachanteId = getDespachanteId(req);
+  if (!despachanteId) return res.status(401).json({ erro: 'Não autorizado' });
+
   const { processo_id } = req.body;
-  const token = crypto.randomBytes(20).toString('hex');
+  const token = crypto.randomBytes(10).toString('hex');
   try {
     await pool.query(
-      'INSERT INTO portal_solicitacoes (token, processo_id) VALUES ($1, $2)',
-      [token, processo_id || null]
+      'INSERT INTO portal_solicitacoes (token, processo_id, status, despachante_id) VALUES ($1, $2, $3, $4)',
+      [token, processo_id || null, 'pendente', despachanteId]
     );
-    res.json({ token, link: `/portal-cliente.html?token=${token}` });
+    res.json({ token });
   } catch (err) {
+    console.error("Erro ao gerar link:", err.message);
     res.status(500).json({ erro: err.message });
   }
 });
 
-// Buscar dados da solicitação pelo token
+// Buscar dados da solicitação pelo token (Sem autenticação, é o cliente que acessa)
 router.get('/solicitacao/:token', async (req, res) => {
   try {
     const result = await pool.query(
@@ -61,7 +77,6 @@ router.post('/enviar/:token', upload.fields([
   const { nome, cpf, telefone, email, cep, endereco, cidade, placa, renavam, chassi, marca, modelo, ano_modelo, ano_fabricacao, combustivel, categoria } = req.body;
 
   try {
-    // Verificar token
     const solResult = await pool.query(
       'SELECT * FROM portal_solicitacoes WHERE token = $1 AND status = $2',
       [token, 'pendente']
@@ -70,11 +85,12 @@ router.post('/enviar/:token', upload.fields([
       return res.status(400).json({ erro: 'Link inválido ou já utilizado' });
     }
     const solicitacao = solResult.rows[0];
+    const despachanteDono = solicitacao.despachante_id;
 
-    // Verificar se cliente já existe
+    // 1. Cadastrar/Atualizar Cliente (AGORA SALVA PARA O DESPACHANTE CORRETO)
     let clienteId;
-    const clienteExistente = await pool.query('SELECT id FROM clientes WHERE cpf = $1', [cpf]);
-
+    const clienteExistente = await pool.query('SELECT id FROM clientes WHERE cpf = $1 AND despachante_id = $2', [cpf, despachanteDono]);
+    
     if (clienteExistente.rows.length > 0) {
       clienteId = clienteExistente.rows[0].id;
       await pool.query(
@@ -83,30 +99,29 @@ router.post('/enviar/:token', upload.fields([
       );
     } else {
       const novoCliente = await pool.query(
-        'INSERT INTO clientes (nome, cpf, telefone, email, endereco, cidade, cep) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id',
-        [nome, cpf, telefone, email, endereco, cidade, cep]
+        'INSERT INTO clientes (nome, cpf, telefone, email, endereco, cidade, cep, despachante_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id',
+        [nome, cpf, telefone, email, endereco, cidade, cep, despachanteDono]
       );
       clienteId = novoCliente.rows[0].id;
     }
 
-    // Cadastrar veículo se placa foi informada
+    // 2. Cadastrar veículo
     let veiculoId = null;
     if (placa) {
-      const veiculoExistente = await pool.query('SELECT id FROM veiculos WHERE placa = $1', [placa]);
-      if (veiculoExistente.rows.length > 0) {
-        veiculoId = veiculoExistente.rows[0].id;
+      const vExistente = await pool.query('SELECT id FROM veiculos WHERE placa = $1', [placa]);
+      if (vExistente.rows.length > 0) {
+        veiculoId = vExistente.rows[0].id;
       } else {
-        const novoVeiculo = await pool.query(
+        const nV = await pool.query(
           'INSERT INTO veiculos (cliente_id, placa, renavam, chassi, marca, modelo, ano_modelo, ano_fabricacao, combustivel, categoria) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id',
           [clienteId, placa, renavam, chassi, marca, modelo, ano_modelo, ano_fabricacao, combustivel, categoria]
         );
-        veiculoId = novoVeiculo.rows[0].id;
+        veiculoId = nV.rows[0].id;
       }
     }
 
-    // Salvar documentos enviados
-    const arquivos = req.files;
-    for (const [tipo, files] of Object.entries(arquivos || {})) {
+    // 3. Salvar Documentos
+    for (const [tipo, files] of Object.entries(req.files || {})) {
       const file = files[0];
       await pool.query(
         'INSERT INTO portal_documentos (solicitacao_id, tipo_documento, nome_arquivo, caminho) VALUES ($1,$2,$3,$4)',
@@ -114,19 +129,11 @@ router.post('/enviar/:token', upload.fields([
       );
     }
 
-    // Atualizar status da solicitação
+    // 4. Finalizar Solicitação
     await pool.query(
-      'UPDATE portal_solicitacoes SET status=$1 WHERE id=$2',
-       ['concluido', nome, solicitacao.id]
+      'UPDATE portal_solicitacoes SET status=$1, nome_cliente=$2 WHERE id=$3',
+      ['concluido', nome, solicitacao.id]
     );
-
-    // Atualizar processo se existir
-    if (solicitacao.processo_id && veiculoId) {
-      await pool.query(
-        'UPDATE processos SET cliente_id=$1, veiculo_id=$2 WHERE id=$3',
-        [clienteId, veiculoId, solicitacao.processo_id]
-      );
-    }
 
     res.json({ sucesso: true, mensagem: 'Dados enviados com sucesso!' });
   } catch (err) {
@@ -135,16 +142,22 @@ router.post('/enviar/:token', upload.fields([
   }
 });
 
-// Listar solicitações pendentes
+// Listar solicitações para o Dashboard (AGORA ISOLADO POR DESPACHANTE)
 router.get('/pendentes', async (req, res) => {
+  const despachanteId = getDespachanteId(req);
+  if (!despachanteId) return res.status(401).json({ erro: 'Não autorizado' });
+
   try {
     const result = await pool.query(
       `SELECT ps.*, 
-        COALESCE(ps.nome_cliente, c.nome) as cliente_nome
+        COALESCE(ps.nome_cliente, c.nome, 'Cliente Novo') as cliente_nome
        FROM portal_solicitacoes ps
        LEFT JOIN processos p ON ps.processo_id = p.id
        LEFT JOIN clientes c ON p.cliente_id = c.id
-       ORDER BY ps.criado_em DESC`
+       WHERE ps.status = 'concluido' 
+       AND (ps.despachante_id = $1 OR c.despachante_id = $1)
+       ORDER BY ps.criado_em DESC LIMIT 10`,
+      [despachanteId]
     );
     res.json(result.rows);
   } catch (err) {
@@ -152,6 +165,7 @@ router.get('/pendentes', async (req, res) => {
   }
 });
 
+// Buscar documentos de uma solicitação específica
 router.get('/documentos/:solicitacao_id', async (req, res) => {
   try {
     const result = await pool.query(
@@ -164,6 +178,7 @@ router.get('/documentos/:solicitacao_id', async (req, res) => {
   }
 });
 
+// Excluir solicitação e seus documentos
 router.delete('/:id', async (req, res) => {
   try {
     await pool.query('DELETE FROM portal_documentos WHERE solicitacao_id = $1', [req.params.id]);

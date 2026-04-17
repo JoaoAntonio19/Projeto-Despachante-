@@ -6,6 +6,7 @@
   <title>Veículos - Despachante Guaxupé</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/veiculos.css" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
 
@@ -45,9 +46,9 @@
         <thead>
           <tr>
             <th>Veículo</th>
-            <th>Marca</th>
+            <th>Proprietário</th>
             <th>Placa</th>
-            <th>Cor</th>
+            <th>Ano Modelo</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -69,35 +70,52 @@
         <form id="formVeiculo">
           <input type="hidden" id="veiculoId" />
           <div class="form-grid">
-            <div class="form-group">
-              <label>Marca</label>
-              <input type="text" id="veiculoMarca" required />
-            </div>
-            <div class="form-group">
-              <label>Modelo</label>
-              <input type="text" id="veiculoModelo" required />
+            <div class="form-group full">
+              <label>Cliente Dono do Veículo</label>
+              <select id="veiculoCliente" required>
+                <option value="">Carregando clientes...</option>
+              </select>
             </div>
             <div class="form-group">
               <label>Placa</label>
-              <input type="text" id="veiculoPlaca" maxlength="8" required />
+              <input type="text" id="veiculoPlaca" maxlength="10" required placeholder="Placa"/>
             </div>
             <div class="form-group">
-              <label>Ano</label>
-              <input type="number" id="veiculoAno" required />
+              <label>Renavam</label>
+              <input type="text" id="veiculoRenavam" maxlength="20" placeholder="Renavam"/>
             </div>
             <div class="form-group">
-              <label>Cor</label>
-              <input type="text" id="veiculoCor" />
+              <label>Marca</label>
+              <input type="text" id="veiculoMarca" placeholder="Marca"/>
             </div>
             <div class="form-group">
+              <label>Modelo</label>
+              <input type="text" id="veiculoModelo" placeholder="Modelo"/>
+            </div>
+            <div class="form-group">
+              <label>Categoria</label>
+              <input type="text" id="veiculoCategoria" placeholder="Ex: Particular, Aluguel..." />
+            </div>
+            <div class="form-group">
+              <label>Ano Fabricação</label>
+              <input type="number" id="veiculoAnoFab" placeholder="Ano de Fabricação"/>
+            </div>
+            <div class="form-group">
+              <label>Ano Modelo</label>
+              <input type="number" id="veiculoAnoMod" placeholder="Ano Modelo" />
+            </div>
+            <div class="form-group">
+              <label>Combustível</label>
+              <input type="text" id="veiculoCombustivel" placeholder="Combustível"/>
+            </div>
+            <div class="form-group full">
               <label>Chassi</label>
-              <input type="text" id="veiculoChassi" />
+              <input type="text" id="veiculoChassi" maxlength="30" placeholder="Chassi"/>
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button class="btn-secundario" onclick="fecharModalVeiculo()">Cancelar</button>
         <button class="btn-primary" onclick="salvarVeiculo()">Salvar</button>
       </div>
     </div>
@@ -167,7 +185,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       carregarPerfil();
-      carregarVeiculos();
+      carregarDadosVeiculos();
     });
   </script>
 </body>

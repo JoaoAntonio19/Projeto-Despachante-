@@ -20,6 +20,7 @@ function verificarAuth(dados) {
   return true;
 }
 
+// Function retained from your original code
 async function buscarCEP() {
   const cep = document.getElementById('clienteCEP')?.value.replace(/\D/g, '');
   if (!cep || cep.length !== 8) return;
@@ -29,8 +30,12 @@ async function buscarCEP() {
     if (dados.erro) { alert('CEP não encontrado.'); return; }
     const endereco = document.getElementById('clienteEndereco');
     const cidade = document.getElementById('clienteCidade');
+    // Assuming you might add an estado field later to viacep
+    const estado = document.getElementById('clienteEstado'); 
+    
     if (endereco) endereco.value = `${dados.logradouro}, ${dados.bairro}`;
     if (cidade) cidade.value = dados.localidade;
+    if (estado) estado.value = dados.uf; // ViaCEP returns 'uf'
   } catch (err) {
     console.error('Erro ao buscar CEP:', err);
   }
@@ -76,8 +81,8 @@ function renderizarTabela(clientes) {
         <td>${c.cidade ? `<span class="badge-cidade">${c.cidade}</span>` : '--'}</td>
         <td>
           <div class="acoes">
-            <button class="btn-icone editar" title="Editar" onclick="editarCliente(${c.id})">✎</button>
-            <button class="btn-icone deletar" title="Excluir" onclick="deletarCliente(${c.id})">✕</button>
+            <button class="btn-icone editar" title="Editar" onclick="editarCliente(${c.id})"><i class="ph ph-pencil-simple"></i></button>
+            <button class="btn-icone deletar" title="Excluir" onclick="deletarCliente(${c.id})"><i class="ph ph-trash"></i></button>
           </div>
         </td>
       </tr>
@@ -92,7 +97,7 @@ async function editarCliente(id) {
   document.getElementById('modalTitulo').textContent = 'Editar Cliente';
   document.getElementById('clienteId').value = cliente.id;
   document.getElementById('clienteNome').value = cliente.nome || '';
-  document.getElementById('clienteCPF').value = cliente.cpf || '';
+  document.getElementById('clienteCPF').value = cliente.cpf || ''; // Fixed capitalization mismatch
   document.getElementById('clienteTelefone').value = cliente.telefone || '';
   document.getElementById('clienteEmail').value = cliente.email || '';
   document.getElementById('clienteEndereco').value = cliente.endereco || '';
@@ -130,7 +135,9 @@ async function salvarCliente() {
     
     if (!res.ok) throw new Error('Erro ao salvar cliente');
     
-    fecharModalCliente();
+    // Attempt to close modal if the function exists
+    if(typeof fecharModalCliente === 'function') fecharModalCliente();
+    
     carregarClientes();
   } catch (err) {
     console.error('Erro ao salvar cliente:', err);

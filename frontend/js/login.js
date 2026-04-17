@@ -6,7 +6,7 @@ async function fazerLogin(event) {
   const erro = document.getElementById('mensagemErro');
 
   try {
-    const response = await fetch('/api/auth/login', {
+    const response = await fetch('http://localhost:3000/api/auth/login', { // Adicionei a URL completa igual aos outros arquivos por segurança
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, senha })
@@ -26,14 +26,14 @@ async function fazerLogin(event) {
     erro.textContent = 'Erro de conexão';
     erro.style.display = 'block';
   }
+} 
 
-// ...existing code do login...
-
-// ...existing code...
 
 function carregarPerfil() {
   const despachante = JSON.parse(localStorage.getItem('despachante') || 'null');
-  if (!despachante) {
+  
+  // Se estiver na página de login, não precisa redirecionar
+  if (!despachante && !window.location.pathname.includes('login.html')) {
     window.location.href = 'login.html';
     return;
   }
@@ -41,8 +41,8 @@ function carregarPerfil() {
   const nome = document.getElementById('perfilNome');
   const email = document.getElementById('perfilEmail');
 
-  if (nome) nome.textContent = despachante.nome;
-  if (email) email.textContent = despachante.email;
+  if (nome) nome.textContent = despachante ? despachante.nome : 'Usuário';
+  if (email) email.textContent = despachante ? despachante.email : '';
 }
 
 function togglePerfil(event) {
@@ -59,7 +59,6 @@ function sair() {
   window.location.href = 'login.html';
 }
 
-// Fechar menu ao clicar em outro lugar
 document.addEventListener('click', (e) => {
   const menu = document.getElementById('profileMenu');
   const btn = document.querySelector('.profile-btn');
@@ -67,4 +66,26 @@ document.addEventListener('click', (e) => {
     menu.classList.remove('ativo');
   }
 });
+
+function configurarOlhinho(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  if (!input || !btn) return;
+
+  const mostrar = () => input.type = 'text';
+  const esconder = () => input.type = 'password';
+
+  btn.addEventListener('mousedown', mostrar);
+  btn.addEventListener('mouseup', esconder);
+  btn.addEventListener('mouseleave', esconder); // Se arrastar o mouse pra fora do botão, esconde!
+
+  btn.addEventListener('touchstart', (e) => { e.preventDefault(); mostrar(); });
+  btn.addEventListener('touchend', esconder);
+  btn.addEventListener('touchcancel', esconder);
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  configurarOlhinho('senha', 'btnOlhoSenha');
+  // Se estiver na tela de cadastro, também ativa o segundo campo
+  configurarOlhinho('confirmaSenha', 'btnOlhoConfirma'); 
+});

@@ -38,7 +38,7 @@ async function fazerCadastro(event) {
   exibirMensagem('Cadastro feito. Verifique seu email para confirmar.', 'sucesso');
   setTimeout(() => {
     window.location.href = 'login.html';
-  }, 2500);
+  }, 500);
 
 
     } else {
@@ -67,3 +67,30 @@ function alternarSenha(campoId) {
   campo.type = mostrar ? 'text' : 'password';
   if (icone) icone.textContent = mostrar ? '🙈' : '👁️';
 }
+
+// --- LÓGICA DO OLHINHO DE SENHA (PRESS & HOLD) ---
+function configurarOlhinho(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  if (!input || !btn) return;
+
+  const mostrar = () => input.type = 'text';
+  const esconder = () => input.type = 'password';
+
+  // Para Computador (Mouse)
+  btn.addEventListener('mousedown', mostrar);
+  btn.addEventListener('mouseup', esconder);
+  btn.addEventListener('mouseleave', esconder); // Se arrastar o mouse pra fora do botão, esconde!
+
+  // Para Celular (Toque)
+  btn.addEventListener('touchstart', (e) => { e.preventDefault(); mostrar(); });
+  btn.addEventListener('touchend', esconder);
+  btn.addEventListener('touchcancel', esconder);
+}
+
+// Ativa a função quando a página carrega
+document.addEventListener('DOMContentLoaded', () => {
+  configurarOlhinho('senha', 'btnOlhoSenha');
+  // Se estiver na tela de cadastro, também ativa o segundo campo
+  configurarOlhinho('confirmaSenha', 'btnOlhoConfirma'); 
+});

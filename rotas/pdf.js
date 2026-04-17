@@ -1,111 +1,155 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../database');
-const PDFDocument = require('pdfkit');
+const puppeteer = require('puppeteer');
+const jwt = require('jsonwebtoken');
+const path = require('path');
+const fs = require('fs');
 
-router.get('/procuracao/:processo_id', async (req, res) => {
+// Função para ler a imagem e transformar em Base64 (para embutir no PDF)
+function getLogoBase64() {
+    try {
+        // Tenta achar a logo na pasta public
+        const logoPath = path.join(__dirname, '..', 'public', 'logo.png');
+        if (fs.existsSync(logoPath)) {
+            const bitmap = fs.readFileSync(logoPath);
+            return `data:image/png;base64,${bitmap.toString('base64')}`;
+        }
+        return null;
+    } catch (err) {
+        return null;
+    }
+}
+
+router.get('/procuracao/:processoId', async (req, res) => {
+  const { processoId } = req.params;
+  const token = req.query.token;
+
+  if (!token) return res.status(401).send('Token não fornecido');
+
   try {
-    // Buscar dados do processo
-    const processoResult = await pool.query(
-      `SELECT p.*, c.nome as cliente_nome, c.cpf as cliente_cpf, 
-       c.endereco, c.cidade, c.cep,
-       v.placa, v.renavam, v.chassi, v.marca, v.modelo
-       FROM processos p
-       LEFT JOIN clientes c ON p.cliente_id = c.id
-       LEFT JOIN veiculos v ON p.veiculo_id = v.id
-       WHERE p.id = $1`,
-      [req.params.processo_id]
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const despachanteId = decoded.id;
 
-    if (processoResult.rows.length === 0) {
-      return res.status(404).json({ erro: 'Processo não encontrado' });
-    }
+    // Buscar dados completos
+    const procResult = await pool.query(`
+      SELECT 
+        p.*, 
+        c.nome as cliente_nome, c.cpf, c.endereco, c.cidade, c.estado,
+        v.placa, v.renavam, v.chassi, v.marca, v.modelo,
+        d.nome as despachante_nome
+      FROM processos p
+      JOIN clientes c ON p.cliente_id = c.id
+      JOIN veiculos v ON p.veiculo_id = v.id
+      JOIN despachantes d ON p.despachante_id = d.id
+      WHERE p.id = $1 AND p.despachante_id = $2
+    `, [processoId, despachanteId]);
 
-    const dados = processoResult.rows[0];
-    const hoje = new Date().toLocaleDateString('pt-BR');
+    if (procResult.rows.length === 0) return res.status(404).send('Processo não encontrado');
+    const dados = procResult.rows[0];
 
-    // Criar PDF
-    const doc = new PDFDocument({ margin: 60, size: 'A4' });
+    // Pegar a logo em Base64
+    const logoSrc = getLogoBase64();
+    const imgTag = logoSrc ? `<img src="${logoSrc}" class="logo" />` : `<h1 class="logo-texto">DESPACHANTE GUAXUPÉ</h1>`;
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=procuracao_${dados.placa || dados.cliente_cpf}.pdf`);
-    doc.pipe(res);
+    const dataAtual = new Date().toLocaleDateString('pt-BR');
 
-    // Cabeçalho
-    doc.fontSize(16).font('Helvetica-Bold')
-       .text('PROCURAÇÃO', { align: 'center' });
-    doc.moveDown(0.5);
-    doc.fontSize(12).font('Helvetica')
-       .text('Ad Negotia Et Ad Judicia', { align: 'center' });
-    doc.moveDown(1.5);
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+       <style>
+          body { font-family: 'Helvetica', 'Arial', sans-serif; padding: 20px 40px; color: #333; line-height: 1.4; }
+          .cabecalho { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #1e3a8a; padding-bottom: 10px; }
+          .logo { max-width: 220px; margin-bottom: 5px; }
+          .logo-texto { color: #1e3a8a; font-size: 22px; margin: 0; }
+          .titulo { font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 5px; letter-spacing: 2px; }
+          .subtitulo { font-size: 13px; text-align: center; font-style: italic; margin-bottom: 20px; color: #555; }
+          
+          .bloco { border: 1px solid #ccc; border-radius: 5px; padding: 12px 15px; margin-bottom: 12px; background-color: #f9fafb; }
+          .bloco-titulo { font-weight: bold; font-size: 13px; color: #1e3a8a; border-bottom: 1px solid #ddd; padding-bottom: 4px; margin-bottom: 6px; text-transform: uppercase; }
+          
+          .linha { margin-bottom: 3px; font-size: 13px; }
+          .label { font-weight: bold; }
+          
+          .poderes { text-align: justify; margin-top: 15px; font-size: 13px; }
+          .data-local { text-align: right; margin-top: 25px; font-size: 13px; }
+          
+          .assinatura-area { margin-top: 50px; text-align: center; }
+          .linha-assinatura { width: 60%; margin: 0 auto; border-top: 1px solid #000; margin-bottom: 5px; }
+          .nome-assinatura { font-weight: bold; font-size: 13px; }
+          .cpf-assinatura { font-size: 11px; color: #555; }
+        </style>
+      </head>
+      <body>
 
-    // Linha separadora
-    doc.moveTo(60, doc.y).lineTo(535, doc.y).stroke();
-    doc.moveDown(1);
+        <div class="cabecalho">
+          ${imgTag}
+        </div>
 
-    // Outorgante
-    doc.fontSize(12).font('Helvetica-Bold').text('OUTORGANTE:');
-    doc.moveDown(0.3);
-    doc.font('Helvetica').fontSize(11);
-    doc.text(`Nome: ${dados.cliente_nome || '___________________________'}`);
-    doc.text(`CPF: ${dados.cliente_cpf || '___________________________'}`);
-    doc.text(`Endereço: ${dados.endereco || '___________________________'}`);
-    doc.text(`Cidade: ${dados.cidade || '___________________________'}`);
-    doc.moveDown(1);
+        <div class="titulo">PROCURAÇÃO</div>
+        <div class="subtitulo">Ad Negotia Et Ad Judicia</div>
 
-    // Outorgado
-    doc.fontSize(12).font('Helvetica-Bold').text('OUTORGADO:');
-    doc.moveDown(0.3);
-    doc.font('Helvetica').fontSize(11);
-    doc.text('Nome: Lawrence Albert Gonçalves');
-    doc.text('Qualificação: Despachante Documentalista');
-    doc.text('Cidade: Guaxupé - MG');
-    doc.moveDown(1);
+        <div class="bloco">
+          <div class="bloco-titulo">Outorgante (Cliente)</div>
+          <div class="linha"><span class="label">Nome:</span> ${dados.cliente_nome}</div>
+          <div class="linha"><span class="label">CPF:</span> ${dados.cpf}</div>
+          <div class="linha"><span class="label">Endereço:</span> ${dados.endereco || '--'}</div>
+          <div class="linha"><span class="label">Cidade/UF:</span> ${dados.cidade || '--'} ${dados.estado ? '- ' + dados.estado : ''}</div>
+        </div>
 
-    // Veículo
-    if (dados.placa) {
-      doc.fontSize(12).font('Helvetica-Bold').text('DADOS DO VEÍCULO:');
-      doc.moveDown(0.3);
-      doc.font('Helvetica').fontSize(11);
-      doc.text(`Placa: ${dados.placa || '___________'}`);
-      doc.text(`RENAVAM: ${dados.renavam || '___________'}`);
-      doc.text(`Chassi: ${dados.chassi || '___________'}`);
-      doc.text(`Marca/Modelo: ${dados.marca || '___'} ${dados.modelo || '___'}`);
-      doc.moveDown(1);
-    }
+        <div class="bloco">
+          <div class="bloco-titulo">Outorgado (Despachante)</div>
+          <div class="linha"><span class="label">Nome:</span> ${dados.despachante_nome}</div>
+          <div class="linha"><span class="label">Qualificação:</span> Despachante</div>
+          <div class="linha"><span class="label">Cidade:</span> Guaxupé - MG</div>
+        </div>
 
-    // Poderes
-    doc.fontSize(12).font('Helvetica-Bold').text('PODERES:');
-    doc.moveDown(0.3);
-    doc.font('Helvetica').fontSize(11);
-    doc.text(
-      `Pelo presente instrumento particular de procuração,
-       o(a) OUTORGANTE acima qualificado(a) nomeia e constitui seu bastante procurador o(a) OUTORGADO(A),
-        a quem confere amplos poderes para representá-lo(a) junto ao DETRAN-MG e demais órgãos competentes,
-        para fins de: ${dados.tipo || 'serviços de despachante'},
-        podendo assinar documentos, requerer certidões,
-        pagar taxas e praticar todos os atos necessários ao fiel cumprimento deste mandato.`,
-      { align: 'justify' }
-    );
-    doc.moveDown(1.5);
+        <div class="bloco">
+          <div class="bloco-titulo">Dados do Veículo</div>
+          <div class="linha"><span class="label">Placa:</span> ${dados.placa}</div>
+          <div class="linha"><span class="label">Renavam:</span> ${dados.renavam || '--'}</div>
+          <div class="linha"><span class="label">Chassi:</span> ${dados.chassi || '--'}</div>
+          <div class="linha"><span class="label">Marca/Modelo:</span> ${dados.marca || ''} ${dados.modelo || ''}</div>
+        </div>
 
-    // Local e data
-    doc.fontSize(11).font('Helvetica')
-       .text(`Guaxupé - MG, ${hoje}`, { align: 'right' });
-    doc.moveDown(3);
+        <div class="poderes">
+          <div class="bloco-titulo">Poderes Concedidos</div>
+          Pelo presente instrumento particular de procuração, o(a) OUTORGANTE acima qualificado(a) nomeia e constitui seu bastante procurador o(a) OUTORGADO(a), a quem confere amplos poderes para representá-lo(a) junto ao <b>DETRAN-MG</b>, CIRETRAN, Secretarias da Fazenda e demais órgãos competentes, especificamente para fins de <b>${dados.tipo}</b>.
+          <br><br>
+          Para tanto, o outorgado poderá assinar requerimentos, termos de responsabilidade, formulários do RENAVAM, requerer certidões, solicitar segunda via de CRV/CRLV, pagar taxas, apresentar recursos, dar recibos e praticar todos os atos necessários ao fiel cumprimento e andamento deste mandato, dando tudo por bom, firme e valioso.
+        </div>
 
-    // Assinatura
-    doc.moveTo(150, doc.y).lineTo(450, doc.y).stroke();
-    doc.moveDown(0.5);
-    doc.fontSize(11).font('Helvetica')
-       .text(dados.cliente_nome || 'Outorgante', { align: 'center' });
-    doc.text('CPF: ' + (dados.cliente_cpf || ''), { align: 'center' });
+        <div class="data-local">
+          Guaxupé - MG, ${dataAtual}
+        </div>
 
-    doc.end();
+        <div class="assinatura-area">
+          <div class="linha-assinatura"></div>
+          <div class="nome-assinatura">${dados.cliente_nome}</div>
+          <div class="cpf-assinatura">CPF: ${dados.cpf}</div>
+        </div>
+
+      </body>
+      </html>
+    `;
+
+    const browser = await puppeteer.launch({ headless: 'new' });
+    const page = await browser.newPage();
+    await page.setContent(html);
+    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+    await browser.close();
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Length': pdfBuffer.length
+    });
+    res.send(pdfBuffer);
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ erro: err.message });
+    res.status(500).send('Erro ao gerar PDF');
   }
 });
 

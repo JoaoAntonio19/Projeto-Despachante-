@@ -6,6 +6,7 @@
   <title>Processos - Despachante Guaxupé</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/processos.css" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
 
@@ -60,7 +61,6 @@
     </div>
   </div>
 
-  <!-- MODAL PROCESSO -->
   <div class="modal-overlay" id="modalProcesso">
     <div class="modal">
       <div class="modal-header">
@@ -97,8 +97,8 @@
               <input type="date" id="processoDataAbertura" required />
             </div>
             <div class="form-group">
-              <label>Prazo (dias)</label>
-              <input type="number" id="processoPrazo" required />
+              <label>Data de Vencimento</label>
+              <input type="date" id="processoDataVencimento" />
             </div>
             <div class="form-group">
               <label>Status</label>
@@ -110,15 +110,47 @@
               </select>
             </div>
             <div class="form-group full">
-              <label>Descrição</label>
-              <textarea id="processoDescricao" rows="3"></textarea>
+              <label>Observações</label>
+              <textarea id="processoObservacoes" rows="3"></textarea>
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button class="btn-secundario" onclick="fecharModalProcesso()">Cancelar</button>
         <button class="btn-primary" onclick="salvarProcesso()">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalChecklist">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Checklist de Documentos</h2>
+        <button class="modal-fechar" onclick="fecharModalChecklist()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 15px; font-size: 14px; color: #64748b;">
+          Verificação automática de documentos enviados pelo portal para este processo.
+        </p>
+        <div id="listaChecklist">
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalLink">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>Link do Portal do Cliente</h2>
+        <button class="modal-fechar" onclick="fecharModalLink()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 10px; font-size: 14px; color: #64748b;">Copie o link abaixo e envie para o cliente pelo WhatsApp ou E-mail. Ele já está vinculado a este processo!</p>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="linkGerado" readonly style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px;" />
+          <button class="btn-primary" onclick="copiarLink()" style="white-space: nowrap;">Copiar</button>
+        </div>
+        <p id="linkCopiado" style="display: none; color: #16a34a; font-size: 12px; margin-top: 8px; font-weight: bold;">✅ Link copiado para a área de transferência!</p>
       </div>
     </div>
   </div>
