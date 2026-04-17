@@ -38,7 +38,8 @@ async function fazerCadastro(event) {
   exibirMensagem('Cadastro feito. Verifique seu email para confirmar.', 'sucesso');
   setTimeout(() => {
     window.location.href = 'login.html';
-  }, 3000);
+  }, 2500);
+
 
     } else {
       exibirMensagem(dados.mensagem || 'Erro ao cadastrar', 'erro');

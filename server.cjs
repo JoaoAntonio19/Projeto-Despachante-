@@ -12,17 +12,19 @@ app.use(express.json());
 app.use(express.static(path.join(process.cwd(), 'frontend')));
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
+
 // ─── Middleware de autenticação JWT ───────────────────────────────────────────
 function autenticar(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  if (!token) return res.status(401).json({ mensagem: 'Token não fornecido' });
+  const auth = req.headers.authorization?.split(' ')[1];
+  if (!auth) return res.status(401).json({ mensagem: 'Não autorizado' });
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ mensagem: 'Token inválido ou expirado' });
-    req.user = user;
+  try {
+    const payload = jwt.verify(auth, process.env.JWT_SECRET);
+    req.user = payload;
     next();
-  });
+  } catch {
+    return res.status(401).json({ mensagem: 'Token inválido' });
+  }
 }
 
 // ─── Nodemailer ───────────────────────────────────────────────────────────────
@@ -93,6 +95,19 @@ app.post('/api/auth/cadastro', async (req, res) => {
   }
 });
 
+app.get('/api/clientes', autenticar, async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      'SELECT * FROM clientes WHERE despachante_id = $1 ORDER BY nome',
+      [req.user.id]
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensagem: 'Erro no servidor' });
+  }
+});
+
 app.get('/api/auth/verificar-email', async (req, res) => {
   const token = req.query.token;
   if (!token) return res.status(400).json({ mensagem: 'Token ausente' });
@@ -141,6 +156,86 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ mensagem: 'Erro no servidor' });
+  }
+});
+
+
+app.post('/api/clientes', autenticar, async (req, res) => {
+  const { nome, telefone } = req.body;
+  
+  if (!nome || !telefone) {
+    return res.status(400).json({ mensagem: 'Preencha todos os campos' });
+  }
+
+  try {
+    const { rows } = await db.query(
+      'INSERT INTO clientes (nome, telefone, despachante_id) VALUES ($1, $2, $3) RETURNING *',
+      [nome, telefone, req.user.id]
+    );
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensagem: 'Erro no servidor' });
+  }
+});
+
+app.get('/api/veiculos', autenticar, async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      'SELECT * FROM veiculos WHERE despachante_id = $1 ORDER BY placa',
+      [req.user.id]
+    );
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ mensagem: 'Erro no servidor' });
+  }
+});
+
+app.post('/api/veiculos', autenticar, async (req, res) => {
+  const { placa, marca, modelo } = req.body;
+  
+  if (!placa || !marca || !modelo) {
+    return res.status(400).json({ mensagem: 'Preencha todos os campos' });
+  }
+
+  try {
+    const { rows } = await db.query(
+      'INSERT INTO veiculos (placa, marca, modelo, despachante_id) VALUES ($1, $2, $3, $4) RETURNING *',
+      [placa, marca, modelo, req.user.id]
+    );
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    res.status(500).json({ mensagem: 'Erro no servidor' });
+  }
+});
+
+app.get('/api/processos', autenticar, async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      'SELECT * FROM processos WHERE despachante_id = $1 ORDER BY criado_em DESC',
+      [req.user.id]
+    );
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ mensagem: 'Erro no servidor' });
+  }
+});
+
+app.post('/api/processos', autenticar, async (req, res) => {
+  const { numero, cliente_id, veiculo_id, descricao } = req.body;
+  
+  if (!numero || !cliente_id || !veiculo_id) {
+    return res.status(400).json({ mensagem: 'Preencha todos os campos' });
+  }
+
+  try {
+    const { rows } = await db.query(
+      'INSERT INTO processos (numero, cliente_id, veiculo_id, descricao, despachante_id) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [numero, cliente_id, veiculo_id, descricao, req.user.id]
+    );
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    res.status(500).json({ mensagem: 'Erro no servidor' });
   }
 });
 

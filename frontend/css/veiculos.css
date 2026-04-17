@@ -1,4 +1,8 @@
-.veiculo-info { display: flex; align-items: center; gap: 10px; }
+.veiculo-info { 
+  display: flex; 
+  align-items: center; 
+  gap: 10px; 
+}
 
 .veiculo-icone {
   width: 34px;
@@ -15,7 +19,11 @@
   letter-spacing: 0.5px;
 }
 
-.veiculo-marca { font-size: 12px; color: #64748B; margin-top: 2px; }
+.veiculo-marca { 
+  font-size: 12px; 
+  color: #64748B; 
+  margin-top: 2px; 
+}
 
 .badge-placa {
   background: #1E3A5F;

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard - Despachante Guaxupé</title>
+  <title>Processos - Despachante Guaxupé</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/processos.css" />
 </head>
@@ -18,10 +18,10 @@
       <span>Guaxupé</span>
     </div>
     <nav>
-      <a href="index.html" class="active">Dashboard</a>
+      <a href="index.html">Dashboard</a>
       <a href="clientes.html">Clientes</a>
       <a href="veiculos.html">Veículos</a>
-      <a href="processos.html">Processos</a>
+      <a href="processos.html" class="active">Processos</a>
     </nav>
     <div class="sidebar-rodape">Sistema v1.0 &mdash; Guaxupé</div>
   </div>
@@ -29,60 +29,17 @@
   <div class="main">
     <div class="topo">
       <div class="topo-info">
-        <h1>Dashboard</h1>
-        <p class="subtitulo">Aqui está o resumo do dia.</p>
+        <h1>Processos</h1>
+        <p class="subtitulo">Acompanhe todos os processos em andamento.</p>
       </div>
-      <button class="btn-primary btn-gerar-link" onclick="gerarLinkPortal()">
-        + Gerar Link para Cliente
+      <button class="btn-primary" onclick="abrirModalProcesso()">
+        + Novo Processo
       </button>
     </div>
 
-    <div class="cards">
-      <div class="card azul">
-        <div class="numero" id="totalClientes">--</div>
-        <div class="label">Clientes Cadastrados</div>
-      </div>
-      <div class="card">
-        <div class="numero" id="totalVeiculos">--</div>
-        <div class="label">Veículos Cadastrados</div>
-      </div>
-      <div class="card amarelo">
-        <div class="numero" id="totalAbertos">--</div>
-        <div class="label">Processos em Aberto</div>
-      </div>
-      <div class="card vermelho">
-        <div class="numero" id="totalAlertas">--</div>
-        <div class="label">Vencem em 30 dias</div>
-      </div>
-    </div>
-
     <div class="section">
-      <div class="section-header">
-        <h2>Consulta Detran / SEF-MG 
-      </div>
-      <div class="consulta-box">
-        <div class="form-group" style="flex:1; min-width:200px;">
-          <label>Placa do Veículo</label>
-          <input type="text" id="placaConsulta" placeholder="Ex: ABC-1234" maxlength="8" />
-        </div>
-        <div class="form-group" style="flex:1; min-width:180px;">
-          <label>Tipo de Consulta</label>
-          <select id="tipoConsulta">
-            <option value="situacao">Situação do Veículo (Detran)</option>
-            <option value="ipva">IPVA / Licenciamento (SEF-MG)</option>
-            <option value="multas">Multas e Infrações</option>
-          </select>
-        </div>
-        <button class="btn-primary" onclick="consultarDetran()" style="height:42px; margin-top:22px; white-space:nowrap;">
-          Consultar
-        </button>
-      </div>
-      <div class="resultado-consulta" id="resultadoConsulta"></div>
-    </div>
-
-    <div class="section">
-      <div class="section-header">
-        <h2>Processos com Prazo Próximo</h2>
+      <div style="margin-bottom: 16px;">
+        <input type="text" id="searchProcessos" placeholder="Buscar por cliente ou tipo..." style="max-width: 300px;" />
       </div>
       <table>
         <thead>
@@ -90,90 +47,148 @@
             <th>Cliente</th>
             <th>Tipo</th>
             <th>Placa</th>
-            <th>Vencimento</th>
+            <th>Data Abertura</th>
+            <th>Prazo</th>
             <th>Status</th>
+            <th>Ações</th>
           </tr>
         </thead>
-        <tbody id="tabelaAlertas">
-          <tr><td colspan="5" class="vazio">Carregando...</td></tr>
+        <tbody id="tabelaProcessos">
+          <tr><td colspan="7" class="vazio">Carregando...</td></tr>
         </tbody>
       </table>
     </div>
-
-    <div class="section">
-      <div class="section-header">
-        <h2>Solicitações do Portal</h2>
-      </div>
-      <div id="listaSolicitacoes">
-        <p class="vazio">Carregando...</p>
-      </div>
-    </div>
   </div>
 
-  <div class="modal-overlay" id="modalLink">
+  <!-- MODAL PROCESSO -->
+  <div class="modal-overlay" id="modalProcesso">
     <div class="modal">
       <div class="modal-header">
-        <h2>Link Gerado!</h2>
-        <button class="modal-fechar" onclick="fecharModalLink()">&times;</button>
+        <h2 id="modalTitulo">Novo Processo</h2>
+        <button class="modal-fechar" onclick="fecharModalProcesso()">&times;</button>
       </div>
       <div class="modal-body">
-        <p style="color:#64748B; font-size:13px; margin-bottom:16px;">
-          Copie o link abaixo e envie para o cliente via WhatsApp.
-        </p>
-        <div class="link-box">
-          <input type="text" id="linkGerado" readonly />
-          <button class="btn-copiar" onclick="copiarLink()">Copiar</button>
-        </div>
-        <div id="linkCopiado" style="display:none; color:#166534; font-size:13px; margin-top:8px; font-weight:500;">
-          Link copiado com sucesso!
-        </div>
+        <form id="formProcesso">
+          <input type="hidden" id="processoId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Cliente</label>
+              <select id="processoCliente" required>
+                <option value="">Selecione um cliente</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Veículo</label>
+              <select id="processoVeiculo" required>
+                <option value="">Selecione um veículo</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tipo de Processo</label>
+              <select id="processoTipo" required>
+                <option value="transferencia">Transferência</option>
+                <option value="licenciamento">Licenciamento</option>
+                <option value="multa">Multa</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Data de Abertura</label>
+              <input type="date" id="processoDataAbertura" required />
+            </div>
+            <div class="form-group">
+              <label>Prazo (dias)</label>
+              <input type="number" id="processoPrazo" required />
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="processoStatus" required>
+                <option value="aberto">Aberto</option>
+                <option value="em_andamento">Em Andamento</option>
+                <option value="concluido">Concluído</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label>Descrição</label>
+              <textarea id="processoDescricao" rows="3"></textarea>
+            </div>
+          </div>
+        </form>
       </div>
       <div class="modal-footer">
-        <button class="btn-primary" onclick="fecharModalLink()">Fechar</button>
+        <button class="btn-secundario" onclick="fecharModalProcesso()">Cancelar</button>
+        <button class="btn-primary" onclick="salvarProcesso()">Salvar</button>
       </div>
     </div>
   </div>
 
-  <div class="modal-overlay" id="modalDocs">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Documentos Enviados</h2>
-        <button class="modal-fechar" onclick="fecharModalDocs()">&times;</button>
-      </div>
-      <div class="modal-body" id="docsConteudo"></div>
-      <div class="modal-footer">
-        <button class="btn-primary" onclick="fecharModalDocs()">Fechar</button>
+  <!-- PERFIL NO CANTO INFERIOR DIREITO -->
+  <div class="footer-profile">
+    <div class="profile-container">
+      <button type="button" class="profile-btn" onclick="togglePerfil(event)">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+        </svg>
+      </button>
+
+      <div class="profile-menu" id="profileMenu">
+        <div class="menu-header">
+          <strong id="perfilNome">Carregando...</strong>
+          <span id="perfilEmail">email@example.com</span>
+        </div>
+        <hr class="menu-divider">
+        <button type="button" class="menu-item" onclick="sair()">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+          </svg>
+          Sair
+        </button>
       </div>
     </div>
   </div>
 
-  <script src="js/dashboard.js"></script>
+  <script src="js/login.js"></script>
+  <script src="js/processos.js"></script>
   <script>
-
- if (!localStorage.getItem('token')) {
-    window.location.href = 'login.html';
-  }
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+    }
 
     function toggleMenu() {
       document.querySelector('.sidebar').classList.toggle('aberta');
       document.getElementById('sidebarOverlay').classList.toggle('ativo');
     }
+    
     function fecharMenu() {
       document.querySelector('.sidebar').classList.remove('aberta');
       document.getElementById('sidebarOverlay').classList.remove('ativo');
     }
-    function consultarDetran() {
-      const placa = document.getElementById('placaConsulta').value.trim();
-      const tipo = document.getElementById('tipoConsulta').value;
-      const resultado = document.getElementById('resultadoConsulta');
-      if (!placa) { alert('Digite a placa do veículo para consultar.'); return; }
-      const nomes = { situacao: 'Situação do Veículo', ipva: 'IPVA/Licenciamento', multas: 'Multas e Infrações' };
-      resultado.classList.add('visivel');
-      resultado.innerHTML = `<p style="color:#64748B; font-size:13px; text-align:center; padding:8px 0;">
-        Consulta de <strong>${nomes[tipo]}</strong> para a placa <strong>${placa.toUpperCase()}</strong><br><br>
-        Integração com API do Detran em desenvolvimento. Em breve disponível!
-      </p>`;
+
+    function abrirModalProcesso() {
+      document.getElementById('modalTitulo').textContent = 'Novo Processo';
+      document.getElementById('processoId').value = '';
+      document.getElementById('formProcesso').reset();
+      document.getElementById('modalProcesso').classList.add('ativo');
     }
+
+    function fecharModalProcesso() {
+      document.getElementById('modalProcesso').classList.remove('ativo');
+    }
+
+    // Fechar menu ao clicar fora
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('profileMenu');
+      const btn = document.querySelector('.profile-btn');
+      if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('ativo');
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarPerfil();
+      carregarDados();
+    });
   </script>
 </body>
 </html>

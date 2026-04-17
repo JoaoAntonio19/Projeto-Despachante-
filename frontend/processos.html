@@ -9,144 +9,185 @@
 </head>
 <body>
 
-<button class="btn-menu-mobile" onclick="toggleMenu()">&#9776;</button>
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="fecharMenu()"></div>
+  <button class="btn-menu-mobile" onclick="toggleMenu()">&#9776;</button>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="fecharMenu()"></div>
 
-<div class="sidebar">
-  <div class="logo">Despachante <span>Guaxupé</span></div>
-  <nav>
-    <a href="index.html">Dashboard</a>
-    <a href="clientes.html">Clientes</a>
-    <a href="veiculos.html">Veículos</a>
-    <a href="processos.html" class="active">Processos</a>
-  </nav>
-  <div class="sidebar-rodape">Sistema v1.0 &mdash; Guaxupé</div>
-</div>
-
-<div class="main">
-  <div class="topo">
-    <div class="topo-info">
-      <h1>Processos</h1>
-      <p class="subtitulo">Gerencie os processos e serviços em andamento.</p>
+  <div class="sidebar">
+    <div class="logo">
+      Despachante
+      <span>Guaxupé</span>
     </div>
-    <button class="btn-primary" onclick="abrirModal()">+ Novo Processo</button>
+    <nav>
+      <a href="index.html">Dashboard</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="veiculos.html">Veículos</a>
+      <a href="processos.html" class="active">Processos</a>
+    </nav>
+    <div class="sidebar-rodape">Sistema v1.0 &mdash; Guaxupé</div>
   </div>
 
-  <div class="section" style="margin-bottom: 20px;">
-    <input type="text" id="campoBusca" placeholder="Buscar por cliente ou tipo..." oninput="buscarProcessos()" />
-  </div>
-
-  <div class="section">
-    <table>
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Veículo</th>
-          <th>Tipo</th>
-          <th>Abertura</th>
-          <th>Vencimento</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaProcessos">
-        <tr><td colspan="7" class="vazio">Carregando...</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 id="modalTitulo">Novo Processo</h2>
-      <button class="modal-fechar" onclick="fecharModal()">&times;</button>
+  <div class="main">
+    <div class="topo">
+      <div class="topo-info">
+        <h1>Processos</h1>
+        <p class="subtitulo">Acompanhe todos os processos em andamento.</p>
+      </div>
+      <button class="btn-primary" onclick="abrirModalProcesso()">
+        + Novo Processo
+      </button>
     </div>
-    <div class="modal-body">
-      <input type="hidden" id="processoId" />
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Cliente *</label>
-          <select id="cliente_id" onchange="carregarVeiculosDoCliente()">
-            <option value="">Selecione o cliente</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Veículo</label>
-          <select id="veiculo_id">
-            <option value="">Selecione o veículo</option>
-          </select>
-        </div>
-        <div class="form-group full">
-          <label>Tipo de Serviço *</label>
-          <select id="tipo">
-            <option value="">Selecione</option>
-            <option>Transferência de Veículo</option>
-            <option>Licenciamento</option>
-            <option>Emplacamento</option>
-            <option>Baixa de Veículo</option>
-            <option>Comunicado de Venda</option>
-            <option>Alteração de Dados</option>
-            <option>2ª Via de Documento</option>
-            <option>Outros</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Data de Abertura *</label>
-          <input type="date" id="data_abertura" />
-        </div>
-        <div class="form-group">
-          <label>Data de Vencimento</label>
-          <input type="date" id="data_vencimento" />
-        </div>
-        <div class="form-group full">
-          <label>Status</label>
-          <select id="status">
-            <option value="aberto">Aberto</option>
-            <option value="em_andamento">Em Andamento</option>
-            <option value="concluido">Concluído</option>
-            <option value="cancelado">Cancelado</option>
-          </select>
-        </div>
-        <div class="form-group full">
-          <label>Observações</label>
-          <textarea id="observacoes" rows="3" placeholder="Informações adicionais..."></textarea>
-        </div>
+
+    <div class="section">
+      <div style="margin-bottom: 16px;">
+        <input type="text" id="searchProcessos" placeholder="Buscar por cliente ou tipo..." style="max-width: 300px;" />
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Tipo</th>
+            <th>Placa</th>
+            <th>Data Abertura</th>
+            <th>Prazo</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaProcessos">
+          <tr><td colspan="7" class="vazio">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL PROCESSO -->
+  <div class="modal-overlay" id="modalProcesso">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitulo">Novo Processo</h2>
+        <button class="modal-fechar" onclick="fecharModalProcesso()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="formProcesso">
+          <input type="hidden" id="processoId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Cliente</label>
+              <select id="processoCliente" required>
+                <option value="">Selecione um cliente</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Veículo</label>
+              <select id="processoVeiculo" required>
+                <option value="">Selecione um veículo</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tipo de Processo</label>
+              <select id="processoTipo" required>
+                <option value="transferencia">Transferência</option>
+                <option value="licenciamento">Licenciamento</option>
+                <option value="multa">Multa</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Data de Abertura</label>
+              <input type="date" id="processoDataAbertura" required />
+            </div>
+            <div class="form-group">
+              <label>Prazo (dias)</label>
+              <input type="number" id="processoPrazo" required />
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="processoStatus" required>
+                <option value="aberto">Aberto</option>
+                <option value="em_andamento">Em Andamento</option>
+                <option value="concluido">Concluído</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label>Descrição</label>
+              <textarea id="processoDescricao" rows="3"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secundario" onclick="fecharModalProcesso()">Cancelar</button>
+        <button class="btn-primary" onclick="salvarProcesso()">Salvar</button>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-secundario" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-primary" onclick="salvarProcesso()">Salvar</button>
+  </div>
+
+  <div class="footer-profile">
+    <div class="profile-container">
+      <button type="button" class="profile-btn" onclick="togglePerfil(event)">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+        </svg>
+      </button>
+
+      <div class="profile-menu" id="profileMenu">
+        <div class="menu-header">
+          <strong id="perfilNome">Carregando...</strong>
+          <span id="perfilEmail">email@example.com</span>
+        </div>
+        <hr class="menu-divider">
+        <button type="button" class="menu-item" onclick="sair()">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+          </svg>
+          Sair
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="modal-overlay" id="modalChecklist">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 id="checklistTitulo">Checklist de Documentos</h2>
-      <button class="modal-fechar" onclick="fecharChecklist()">&times;</button>
-    </div>
-    <div class="modal-body">
-      <p id="checklistSubtitulo" style="color:#64748B; font-size:13px; margin-bottom:16px;"></p>
-      <div id="checklistItens"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secundario" onclick="fecharChecklist()">Fechar</button>
-    </div>
-  </div>
-</div>
+  <script src="js/login.js"></script>
+  <script src="js/processos.js"></script>
+  <script>
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+    }
 
-<script src="js/processos.js"></script>
-<script>
-  function toggleMenu() {
-    document.querySelector('.sidebar').classList.toggle('aberta');
-    document.getElementById('sidebarOverlay').classList.toggle('ativo');
-  }
-  function fecharMenu() {
-    document.querySelector('.sidebar').classList.remove('aberta');
-    document.getElementById('sidebarOverlay').classList.remove('ativo');
-  }
-</script>
+    function toggleMenu() {
+      document.querySelector('.sidebar').classList.toggle('aberta');
+      document.getElementById('sidebarOverlay').classList.toggle('ativo');
+    }
+    
+    function fecharMenu() {
+      document.querySelector('.sidebar').classList.remove('aberta');
+      document.getElementById('sidebarOverlay').classList.remove('ativo');
+    }
+
+    function abrirModalProcesso() {
+      document.getElementById('modalTitulo').textContent = 'Novo Processo';
+      document.getElementById('processoId').value = '';
+      document.getElementById('formProcesso').reset();
+      document.getElementById('modalProcesso').classList.add('ativo');
+    }
+
+    function fecharModalProcesso() {
+      document.getElementById('modalProcesso').classList.remove('ativo');
+    }
+
+    // Fechar menu ao clicar fora
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('profileMenu');
+      const btn = document.querySelector('.profile-btn');
+      if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('ativo');
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarPerfil();
+      carregarDados();
+    });
+  </script>
 </body>
 </html>

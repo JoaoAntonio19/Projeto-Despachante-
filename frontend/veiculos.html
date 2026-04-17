@@ -9,139 +9,166 @@
 </head>
 <body>
 
-<button class="btn-menu-mobile" onclick="toggleMenu()">&#9776;</button>
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="fecharMenu()"></div>
+  <button class="btn-menu-mobile" onclick="toggleMenu()">&#9776;</button>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="fecharMenu()"></div>
 
-<div class="sidebar">
-  <div class="logo">Despachante <span>Guaxupé</span></div>
-  <nav>
-    <a href="index.html">Dashboard</a>
-    <a href="clientes.html">Clientes</a>
-    <a href="veiculos.html" class="active">Veículos</a>
-    <a href="processos.html">Processos</a>
-  </nav>
-  <div class="sidebar-rodape">Sistema v1.0 &mdash; Guaxupé</div>
-</div>
-
-<div class="main">
-  <div class="topo">
-    <div class="topo-info">
-      <h1>Veículos</h1>
-      <p class="subtitulo">Gerencie os veículos cadastrados no sistema.</p>
+  <div class="sidebar">
+    <div class="logo">
+      Despachante
+      <span>Guaxupé</span>
     </div>
-    <button class="btn-primary" onclick="abrirModal()">+ Novo Veículo</button>
+    <nav>
+      <a href="index.html">Dashboard</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="veiculos.html" class="active">Veículos</a>
+      <a href="processos.html">Processos</a>
+    </nav>
+    <div class="sidebar-rodape">Sistema v1.0 &mdash; Guaxupé</div>
   </div>
 
-  <div class="section" style="margin-bottom: 20px;">
-    <input type="text" id="campoBusca" placeholder="Buscar por placa ou chassi..." oninput="buscarVeiculos()" />
-  </div>
-
-  <div class="section">
-    <table>
-      <thead>
-        <tr>
-          <th>Placa</th>
-          <th>Renavam</th>
-          <th>Chassi</th>
-          <th>Categoria</th>
-          <th>Ano Mod. / Fab.</th>
-          <th>Combustível</th>
-          <th>Proprietário</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaVeiculos">
-        <tr><td colspan="8" class="vazio">Carregando...</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 id="modalTitulo">Novo Veículo</h2>
-      <button class="modal-fechar" onclick="fecharModal()">&times;</button>
+  <div class="main">
+    <div class="topo">
+      <div class="topo-info">
+        <h1>Veículos</h1>
+        <p class="subtitulo">Gerencie todos os veículos cadastrados.</p>
+      </div>
+      <button class="btn-primary" onclick="abrirModalVeiculo()">
+        + Novo Veículo
+      </button>
     </div>
-    <div class="modal-body">
-      <input type="hidden" id="veiculoId" />
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Proprietário *</label>
-          <select id="cliente_id">
-            <option value="">Selecione o proprietário</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Placa *</label>
-          <input type="text" id="placa" placeholder="ABC-1234" />
-        </div>
-        <div class="form-group">
-          <label>Marca</label>
-          <input type="text" id="marca" />
-        </div>
-        <div class="form-group">
-          <label>Modelo</label>
-          <input type="text" id="modelo" />
-        </div>
-        <div class="form-group">
-          <label>RENAVAM</label>
-          <input type="text" id="renavam" />
-        </div>
-        <div class="form-group">
-          <label>Chassi</label>
-          <input type="text" id="chassi" />
-        </div>
-        <div class="form-group">
-          <label>Categoria</label>
-          <select id="categoria">
-            <option value="">Selecione</option>
-            <option>Particular</option>
-            <option>Comercial</option>
-            <option>Moto</option>
-            <option>Caminhão</option>
-            <option>Ônibus</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Combustível</label>
-          <select id="combustivel">
-            <option value="">Selecione</option>
-            <option>Gasolina</option>
-            <option>Etanol</option>
-            <option>Flex</option>
-            <option>Diesel</option>
-            <option>Elétrico</option>
-            <option>GNV</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Ano Modelo</label>
-          <input type="text" id="ano_modelo" placeholder="2024" />
-        </div>
-        <div class="form-group">
-          <label>Ano Fabricação</label>
-          <input type="text" id="ano_fabricacao" placeholder="2023" />
-        </div>
+
+    <div class="section">
+      <div style="margin-bottom: 16px;">
+        <input type="text" id="searchVeiculos" placeholder="Buscar por placa ou marca..." style="max-width: 300px;" />
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Veículo</th>
+            <th>Marca</th>
+            <th>Placa</th>
+            <th>Cor</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaVeiculos">
+          <tr><td colspan="5" class="vazio">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL VEÍCULO -->
+  <div class="modal-overlay" id="modalVeiculo">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitulo">Novo Veículo</h2>
+        <button class="modal-fechar" onclick="fecharModalVeiculo()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="formVeiculo">
+          <input type="hidden" id="veiculoId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Marca</label>
+              <input type="text" id="veiculoMarca" required />
+            </div>
+            <div class="form-group">
+              <label>Modelo</label>
+              <input type="text" id="veiculoModelo" required />
+            </div>
+            <div class="form-group">
+              <label>Placa</label>
+              <input type="text" id="veiculoPlaca" maxlength="8" required />
+            </div>
+            <div class="form-group">
+              <label>Ano</label>
+              <input type="number" id="veiculoAno" required />
+            </div>
+            <div class="form-group">
+              <label>Cor</label>
+              <input type="text" id="veiculoCor" />
+            </div>
+            <div class="form-group">
+              <label>Chassi</label>
+              <input type="text" id="veiculoChassi" />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secundario" onclick="fecharModalVeiculo()">Cancelar</button>
+        <button class="btn-primary" onclick="salvarVeiculo()">Salvar</button>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-secundario" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-primary" onclick="salvarVeiculo()">Salvar</button>
+  </div>
+
+  <!-- PERFIL NO CANTO INFERIOR DIREITO -->
+  <div class="footer-profile">
+    <div class="profile-container">
+      <button type="button" class="profile-btn" onclick="togglePerfil(event)">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+        </svg>
+      </button>
+
+      <div class="profile-menu" id="profileMenu">
+        <div class="menu-header">
+          <strong id="perfilNome">Carregando...</strong>
+          <span id="perfilEmail">email@example.com</span>
+        </div>
+        <hr class="menu-divider">
+        <button type="button" class="menu-item" onclick="sair()">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+          </svg>
+          Sair
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
-<script src="js/veiculos.js"></script>
-<script>
-  function toggleMenu() {
-    document.querySelector('.sidebar').classList.toggle('aberta');
-    document.getElementById('sidebarOverlay').classList.toggle('ativo');
-  }
-  function fecharMenu() {
-    document.querySelector('.sidebar').classList.remove('aberta');
-    document.getElementById('sidebarOverlay').classList.remove('ativo');
-  }
-</script>
+  <script src="js/login.js"></script>
+  <script src="js/veiculos.js"></script>
+  <script>
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+    }
+
+    function toggleMenu() {
+      document.querySelector('.sidebar').classList.toggle('aberta');
+      document.getElementById('sidebarOverlay').classList.toggle('ativo');
+    }
+    
+    function fecharMenu() {
+      document.querySelector('.sidebar').classList.remove('aberta');
+      document.getElementById('sidebarOverlay').classList.remove('ativo');
+    }
+
+    function abrirModalVeiculo() {
+      document.getElementById('modalTitulo').textContent = 'Novo Veículo';
+      document.getElementById('veiculoId').value = '';
+      document.getElementById('formVeiculo').reset();
+      document.getElementById('modalVeiculo').classList.add('ativo');
+    }
+
+    function fecharModalVeiculo() {
+      document.getElementById('modalVeiculo').classList.remove('ativo');
+    }
+
+    // Fechar menu ao clicar fora
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('profileMenu');
+      const btn = document.querySelector('.profile-btn');
+      if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('ativo');
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarPerfil();
+      carregarVeiculos();
+    });
+  </script>
 </body>
 </html>
