@@ -7,7 +7,7 @@
 .main-content {
     flex: 1;
     padding: 40px;
-    margin-left: 260px; 
+    margin-left: 230px; 
 }
 
 .top-header {
@@ -71,10 +71,32 @@
     color: #334155; 
 }
 
-.form-consulta-page {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+.card-formulario {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden; 
+}
+
+.form-consulta-page input, 
+.form-consulta-page select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #334155;
+    background-color: #f8fafc;
+    transition: all 0.2s ease;
+}
+
+.form-consulta-page input:focus, 
+.form-consulta-page select:focus {
+    border-color: #2563eb;
+    background-color: #ffffff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .form-row {
