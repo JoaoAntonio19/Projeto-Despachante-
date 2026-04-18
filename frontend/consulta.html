@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Consultar Detran - Despachante Guaxupé</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/consulta.css" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+
+  <div class="wrapper">
+    <aside class="sidebar">
+      <div class="logo">Despachante <span>Guaxupé</span></div>
+      <nav>
+        <a href="index.html"><i class="ph ph-chart-pie"></i> Dashboard</a>
+        <a href="clientes.html"><i class="ph ph-users"></i> Clientes</a>
+        <a href="veiculos.html"><i class="ph ph-car"></i> Veículos</a>
+        <a href="processos.html"><i class="ph ph-file-text"></i> Processos</a>
+        <a href="consulta.html" class="active"><i class="ph ph-magnifying-glass"></i> Consulta</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="top-header">
+        <h1>Consulta DETRAN / SEF-MG</h1>
+        <p>Verifique a situação de veículos em tempo real.</p>
+      </header>
+
+      <section class="card-formulario" style="max-width: 800px; margin: 0 auto 30px auto;">
+        <form id="formConsultaDetran" class="form-consulta-page">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div class="form-group">
+              <label>Placa do Veículo</label>
+              <input type="text" id="placaConsulta" placeholder="Ex: ABC-1234" required>
+            </div>
+            <div class="form-group">
+              <label>Tipo de Consulta</label>
+              <select id="tipoConsulta">
+                <option value="detran">Situação do Veículo</option>
+                <option value="ipva">Débitos de IPVA</option>
+                <option value="restricoes">Restrições e Gravames</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">
+            <i class="ph ph-magnifying-glass"></i> Realizar Consulta Agora
+          </button>
+        </form>
+      </section>
+
+      <div id="resultadoConsulta" class="card-tabela" style="display: none; max-width: 800px; margin: 0 auto;">
+        <div class="card-header">
+          <h3><i class="ph ph-list-magnifying-glass"></i> Detalhes do Veículo</h3>
+        </div>
+        
+        <div class="tabela-container">
+          <table class="tabela-padrao">
+            <thead>
+              <tr>
+                <th>CAMPO</th>
+                <th>INFORMAÇÃO RETORNADA</th>
+              </tr>
+            </thead>
+            <tbody id="dadosRetornados">
+              </tbody>
+          </table>
+        </div>
+
+        <div class="alerta-info">
+          <i class="ph ph-info"></i>
+          Esta funcionalidade requer integração com API paga. Os dados abaixo são apenas uma simulação visual.
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/consulta.js"></script>
+  <div class="footer-profile">
+    <div class="profile-container">
+      <button type="button" class="profile-btn" onclick="togglePerfil(event)">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+        </svg>
+      </button>
+
+      <div class="profile-menu" id="profileMenu">
+        <div class="menu-header">
+          <strong id="perfilNome">Carregando...</strong>
+          <span id="perfilEmail">email@example.com</span>
+        </div>
+        <hr class="menu-divider">
+        <button type="button" class="menu-item" onclick="sair()">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+          </svg>
+          Sair
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/login.js"></script> <script src="js/consulta.js"></script>
+  
+  <script>
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+    }
+
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('profileMenu');
+      const btn = document.querySelector('.profile-btn');
+      if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('ativo');
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof carregarPerfil === 'function') {
+        carregarPerfil();
+      }
+    });
+  </script>
+</body>
+</html>
+</body>
+</html>

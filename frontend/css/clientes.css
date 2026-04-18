@@ -38,3 +38,26 @@
   font-weight: 500;
   display: inline-block;
 }
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.grid-endereco {
+    grid-template-columns: 0.5fr 1.5fr;
+}
+
+.grid-cidade {
+    grid-template-columns: 1.5fr 0.5fr;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}

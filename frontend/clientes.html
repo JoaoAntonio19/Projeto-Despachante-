@@ -19,11 +19,12 @@
       <span>Guaxupé</span>
     </div>
     <nav>
-      <a href="index.html">Dashboard</a>
-      <a href="clientes.html" class="active">Clientes</a>
-      <a href="veiculos.html">Veículos</a>
-      <a href="processos.html">Processos</a>
-    </nav>
+     <a href="index.html"><i class="ph ph-chart-pie"></i> Dashboard</a>
+     <a href="clientes.html" class="active"><i class="ph ph-users"></i> Clientes</a>
+     <a href="veiculos.html"><i class="ph ph-car"></i> Veículos</a>
+     <a href="processos.html"><i class="ph ph-file-text"></i> Processos</a>
+     <a href="consulta.html"><i class="ph ph-magnifying-glass"></i> Consulta</a>
+   </nav>
     <div class="sidebar-rodape">Sistema v1.0 &mdash; Guaxupé</div>
   </div>
 
@@ -46,7 +47,7 @@
         <thead>
           <tr>
             <th>Nome</th>
-            <th>CPF/CNPJ</th>
+            <th>CPF</th>
             <th>Telefone</th>
             <th>Cidade</th>
             <th>Ações</th>
@@ -59,7 +60,6 @@
     </div>
   </div>
 
-  <!-- MODAL CLIENTE -->
   <div class="modal-overlay" id="modalCliente">
     <div class="modal">
       <div class="modal-header">
@@ -69,45 +69,58 @@
       <div class="modal-body">
         <form id="formCliente">
           <input type="hidden" id="clienteId" />
-          <div class="form-grid">
+          
+          <div class="form-row">
             <div class="form-group">
               <label>Nome Completo</label>
-              <input type="text" id="clienteNome" required />
+              <input type="text" id="clienteNome" required placeholder="Nome" />
             </div>
             <div class="form-group">
-              <label>CPF/CNPJ</label>
-              <input type="text" id="clienteCPF" required />
+              <label>CPF</label>
+              <input type="text" id="clienteCPF" required placeholder="000.000.000-00"/>
             </div>
+          </div>
+          
+          <div class="form-row">
             <div class="form-group">
               <label>Telefone</label>
-              <input type="text" id="clienteTelefone" required />
+              <input type="text" id="clienteTelefone" required placeholder="(00) 00000-0000"/>
             </div>
             <div class="form-group">
               <label>Email</label>
-              <input type="email" id="clienteEmail" required />
+              <input type="email" id="clienteEmail" required placeholder="Email"/>
             </div>
-            <div class="form-group full">
-              <label>Endereço</label>
-              <input type="text" id="clienteEndereco" />
+          </div>
+
+          <div class="form-row grid-endereco">
+            <div class="form-group">
+              <label>CEP</label>
+              <input type="text" id="cep" placeholder="00000-000" onblur="buscarCEP(this.value)">
             </div>
             <div class="form-group">
+              <label>Endereço</label>
+              <input type="text" id="clienteEndereco" placeholder="Endereço" required>
+            </div>
+          </div>
+
+          <div class="form-row grid-cidade">
+            <div class="form-group">
               <label>Cidade</label>
-              <input type="text" id="clienteCidade" />
+              <input type="text" id="clienteCidade" placeholder="Cidade" required>
             </div>
             <div class="form-group">
               <label>Estado</label>
-              <input type="text" id="clienteEstado" maxlength="2" />
+              <input type="text" id="clienteEstado" placeholder="UF" required maxlength="2">
             </div>
           </div>
         </form>
-      </div>
+       </div>
       <div class="modal-footer">
         <button class="btn-primary" onclick="salvarCliente()">Salvar</button>
       </div>
     </div>
   </div>
 
-  <!-- PERFIL NO CANTO INFERIOR DIREITO -->
   <div class="footer-profile">
     <div class="profile-container">
       <button type="button" class="profile-btn" onclick="togglePerfil(event)">
@@ -160,7 +173,6 @@
       document.getElementById('modalCliente').classList.remove('ativo');
     }
 
-    // Fechar menu ao clicar fora
     document.addEventListener('click', (e) => {
       const menu = document.getElementById('profileMenu');
       const btn = document.querySelector('.profile-btn');

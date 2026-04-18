@@ -20,25 +20,37 @@ function verificarAuth(dados) {
   return true;
 }
 
-// Function retained from your original code
-async function buscarCEP() {
-  const cep = document.getElementById('clienteCEP')?.value.replace(/\D/g, '');
-  if (!cep || cep.length !== 8) return;
-  try {
-    const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-    const dados = await res.json();
-    if (dados.erro) { alert('CEP não encontrado.'); return; }
-    const endereco = document.getElementById('clienteEndereco');
-    const cidade = document.getElementById('clienteCidade');
-    // Assuming you might add an estado field later to viacep
-    const estado = document.getElementById('clienteEstado'); 
-    
-    if (endereco) endereco.value = `${dados.logradouro}, ${dados.bairro}`;
-    if (cidade) cidade.value = dados.localidade;
-    if (estado) estado.value = dados.uf; // ViaCEP returns 'uf'
-  } catch (err) {
-    console.error('Erro ao buscar CEP:', err);
-  }
+async function buscarCEP(valor) {
+    const cep = valor.replace(/\D/g, '');
+
+    if (cep.length !== 8) return;
+
+    try {
+        document.getElementById('clienteEndereco').value = 'Buscando...';
+        
+        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const dados = await response.json();
+
+        if (dados.erro) {
+            alert('CEP não encontrado.');
+            limparCamposEndereco();
+            return;
+        }
+
+        document.getElementById('clienteEndereco').value = `${dados.logradouro}, ${dados.bairro}`;
+        document.getElementById('clienteCidade').value = dados.localidade;
+        document.getElementById('clienteEstado').value = dados.uf;
+
+    } catch (error) {
+        console.error('Erro ao buscar CEP:', error);
+        alert('Erro ao buscar o CEP. Tente preencher manualmente.');
+    }
+}
+
+function limparCamposEndereco() {
+    document.getElementById('clienteEndereco').value = '';
+    document.getElementById('clienteCidade').value = '';
+    document.getElementById('ClienteEstado').value = '';
 }
 
 async function carregarClientes() {

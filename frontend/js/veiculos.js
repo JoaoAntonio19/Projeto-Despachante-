@@ -150,8 +150,7 @@ async function salvarVeiculo() {
     fecharModalVeiculo();
     carregarDadosVeiculos();
   } catch (err) {
-    console.error('Erro ao salvar veículo:', err);
-    alert('Erro ao salvar veículo!');
+   
   }
 }
 

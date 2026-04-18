@@ -6,8 +6,7 @@
   <title>Dashboard - Despachante Guaxupé</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/processos.css" />
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-</head>
+<script src="https://unpkg.com/@phosphor-icons/web"></script></head>
 <body>
 
   <button class="btn-menu-mobile" onclick="toggleMenu()">&#9776;</button>
@@ -19,11 +18,12 @@
       <span>Guaxupé</span>
     </div>
     <nav>
-      <a href="index.html" class="active">Dashboard</a>
-      <a href="clientes.html">Clientes</a>
-      <a href="veiculos.html">Veículos</a>
-      <a href="processos.html">Processos</a>
-    </nav>
+  <a href="index.html" class="active"><i class="ph ph-chart-pie"></i> Dashboard</a>
+  <a href="clientes.html"><i class="ph ph-users"></i> Clientes</a>
+  <a href="veiculos.html"><i class="ph ph-car"></i> Veículos</a>
+  <a href="processos.html"><i class="ph ph-file-text"></i> Processos</a>
+  <a href="consulta.html"><i class="ph ph-magnifying-glass"></i> Consulta</a>
+</nav>
     <div class="sidebar-rodape">Sistema v1.0 &mdash; Guaxupé</div>
   </div>
 
@@ -56,31 +56,6 @@
         <div class="label">Vencem em 30 dias</div>
       </div>
     </div>
-
-    <div class="section">
-      <div class="section-header">
-        <h2>Consulta Detran / SEF-MG 
-      </div>
-      <div class="consulta-box">
-        <div class="form-group" style="flex:1; min-width:200px;">
-          <label>Placa do Veículo</label>
-          <input type="text" id="placaConsulta" placeholder="Ex: ABC-1234" maxlength="8" />
-        </div>
-        <div class="form-group" style="flex:1; min-width:180px;">
-          <label>Tipo de Consulta</label>
-          <select id="tipoConsulta">
-            <option value="situacao">Situação do Veículo (Detran)</option>
-            <option value="ipva">IPVA / Licenciamento (SEF-MG)</option>
-            <option value="multas">Multas e Infrações</option>
-          </select>
-        </div>
-        <button class="btn-primary" onclick="consultarDetran()" style="height:42px; margin-top:22px; white-space:nowrap;">
-          Consultar
-        </button>
-      </div>
-      <div class="resultado-consulta" id="resultadoConsulta"></div>
-    </div>
-
     <div class="section">
       <div class="section-header">
         <h2>Processos com Prazo Próximo</h2>
