@@ -101,3 +101,46 @@ body {
 .icone-status.erro { background: #f8d7da; color: #842029; }
 .card-portal h2 { text-align: center; color: #1a3a5c; margin-bottom: 8px; }
 .card-portal p { text-align: center; color: #666; font-size: 14px; }
+
+.mt-20 { margin-top: 20px; }
+.mt-15 { margin-top: 15px; }
+.mt-4  { margin-top: 4px; }
+
+.header-opcional {
+    margin-bottom: 15px;
+}
+.header-opcional h3 {
+    margin: 0;
+    color: #1a3a5c;
+    font-size: 16px;
+}
+.header-opcional h3 span {
+    color: #888;
+    font-size: 12px;
+    font-weight: normal;
+}
+.header-opcional p {
+    margin: 5px 0 0 0;
+    font-size: 12px;
+    color: #888;
+    text-align: left; 
+}
+
+.fotos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.input-foto {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background-color: #f8fafc;
+}
+.form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+}

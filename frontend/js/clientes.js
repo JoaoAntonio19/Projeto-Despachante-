@@ -91,9 +91,12 @@ function renderizarTabela(clientes) {
         <td>${c.cpf || '--'}</td>
         <td>${c.telefone || '--'}</td>
         <td>${c.cidade ? `<span class="badge-cidade">${c.cidade}</span>` : '--'}</td>
+        
         <td>
           <div class="acoes">
-            <button class="btn-icone editar" title="Editar" onclick="editarCliente(${c.id})"><i class="ph ph-pencil-simple"></i></button>
+            <button class="btn-icone ver-ficha" title="Ver Ficha Completa" onclick="location.href='detalhes-cliente.html?id=${c.id}'" style="color: #2563eb; background: #eff6ff;">
+              <i class="ph ph-identification-card"></i>
+            </button>
             <button class="btn-icone deletar" title="Excluir" onclick="deletarCliente(${c.id})"><i class="ph ph-trash"></i></button>
           </div>
         </td>

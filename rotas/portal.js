@@ -72,9 +72,15 @@ router.post('/enviar/:token', upload.fields([
   { name: 'cnh', maxCount: 1 },
   { name: 'comprovante', maxCount: 1 },
   { name: 'crv', maxCount: 1 },
+  { name: 'fotoFrente', maxCount: 1 },
+  { name: 'fotoTraseira', maxCount: 1 },
+  { name: 'fotoLateral', maxCount: 1 },
+  { name: 'fotoPainel', maxCount: 1 },
+  { name: 'fotosExtras', maxCount: 10 }
+  
 ]), async (req, res) => {
   const { token } = req.params;
-  const { nome, cpf, telefone, email, cep, endereco, cidade, placa, renavam, chassi, marca, modelo, ano_modelo, ano_fabricacao, combustivel, categoria } = req.body;
+  const { nome, cpf, telefone, email, cep, endereco, cidade, estado, placa, renavam, chassi, marca, modelo, ano_modelo, ano_fabricacao, combustivel, categoria } = req.body;
 
   try {
     const solResult = await pool.query(
@@ -94,18 +100,17 @@ router.post('/enviar/:token', upload.fields([
     if (clienteExistente.rows.length > 0) {
       clienteId = clienteExistente.rows[0].id;
       await pool.query(
-        'UPDATE clientes SET nome=$1, telefone=$2, email=$3, endereco=$4, cidade=$5, cep=$6 WHERE id=$7',
-        [nome, telefone, email, endereco, cidade, cep, clienteId]
+        'UPDATE clientes SET nome=$1, telefone=$2, email=$3, endereco=$4, cidade=$5, estado=$6, cep=$7 WHERE id=$8',
+        [nome, telefone, email, endereco, cidade, estado, cep, clienteId]
       );
     } else {
       const novoCliente = await pool.query(
-        'INSERT INTO clientes (nome, cpf, telefone, email, endereco, cidade, cep, despachante_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id',
-        [nome, cpf, telefone, email, endereco, cidade, cep, despachanteDono]
+        'INSERT INTO clientes (nome, cpf, telefone, email, endereco, cidade, estado, cep, despachante_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',
+        [nome, cpf, telefone, email, endereco, cidade, estado, cep, despachanteDono]
       );
       clienteId = novoCliente.rows[0].id;
     }
 
-    // 2. Cadastrar veículo
     let veiculoId = null;
     if (placa) {
       const vExistente = await pool.query('SELECT id FROM veiculos WHERE placa = $1', [placa]);
@@ -120,19 +125,19 @@ router.post('/enviar/:token', upload.fields([
       }
     }
 
-    // 3. Salvar Documentos
     for (const [tipo, files] of Object.entries(req.files || {})) {
-      const file = files[0];
-      await pool.query(
-        'INSERT INTO portal_documentos (solicitacao_id, tipo_documento, nome_arquivo, caminho) VALUES ($1,$2,$3,$4)',
-        [solicitacao.id, tipo, file.originalname, file.path]
-      );
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        await pool.query(
+          'INSERT INTO portal_documentos (solicitacao_id, tipo_documento, nome_arquivo, caminho) VALUES ($1,$2,$3,$4)',
+          [solicitacao.id, tipo, file.originalname, file.path]
+        );
+      }
     }
 
-    // 4. Finalizar Solicitação
     await pool.query(
-      'UPDATE portal_solicitacoes SET status=$1, nome_cliente=$2 WHERE id=$3',
-      ['concluido', nome, solicitacao.id]
+      'UPDATE portal_solicitacoes SET status=$1, nome_cliente=$2, cliente_id=$3, veiculo_id=$4 WHERE id=$5',
+      ['concluido', nome, clienteId, veiculoId, solicitacao.id]
     );
 
     res.json({ sucesso: true, mensagem: 'Dados enviados com sucesso!' });

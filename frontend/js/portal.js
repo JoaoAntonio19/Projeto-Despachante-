@@ -37,6 +37,7 @@ async function buscarCEP() {
     if (!dados.erro) {
       document.getElementById('endereco').value = `${dados.logradouro}, ${dados.bairro}`;
       document.getElementById('cidade').value = dados.localidade;
+      document.getElementById('estado').value = dados.uf;
     }
   } catch (err) {
     console.error('Erro ao buscar CEP:', err);
@@ -61,6 +62,7 @@ async function enviarDados() {
   formData.append('cep', document.getElementById('cep').value);
   formData.append('endereco', document.getElementById('endereco').value);
   formData.append('cidade', document.getElementById('cidade').value);
+  formData.append('estado', document.getElementById('estado').value);
   formData.append('placa', document.getElementById('placa').value);
   formData.append('renavam', document.getElementById('renavam').value);
   formData.append('chassi', document.getElementById('chassi').value);
@@ -77,6 +79,21 @@ async function enviarDados() {
   if (cnh) formData.append('cnh', cnh);
   if (comprovante) formData.append('comprovante', comprovante);
   if (crv) formData.append('crv', crv);
+  const fotoFrente = document.getElementById('fotoFrente').files[0];
+  if (fotoFrente) formData.append('fotoFrente', fotoFrente);
+  const fotoTraseira = document.getElementById('fotoTraseira').files[0];
+  if (fotoTraseira) formData.append('fotoTraseira', fotoTraseira);
+  const fotoLateral = document.getElementById('fotoLateral').files[0];
+  if (fotoLateral) formData.append('fotoLateral', fotoLateral);
+  const fotoPainel = document.getElementById('fotoPainel').files[0];
+  if (fotoPainel) formData.append('fotoPainel', fotoPainel);
+
+  const fotosExtras = document.getElementById('fotosExtras').files;
+  if (fotosExtras.length > 0) {
+    for (let i = 0; i < fotosExtras.length; i++) {
+        formData.append('fotosExtras', fotosExtras[i]);
+    }
+}
 
   try {
     const btn = document.querySelector('.btn-enviar');

@@ -149,6 +149,41 @@
         </div>
       </div>
 
+<div class="card-portal mt-20">
+    <div class="header-opcional">
+        <h3>Fotos do Veículo <span>(Opcional)</span></h3>
+        <p>Envie estas fotos <strong>apenas se o despachante solicitou</strong></p>
+    </div>
+    
+    <div class="fotos-grid">
+        <div class="form-group">
+            <label>Foto da Frente</label>
+            <input type="file" id="fotoFrente" name="fotoFrente" accept="image/*" class="input-foto" />
+        </div>
+        
+        <div class="form-group">
+            <label>Foto da Traseira</label>
+            <input type="file" id="fotoTraseira" name="fotoTraseira" accept="image/*" class="input-foto" />
+        </div>
+
+        <div class="form-group">
+            <label>Foto Lateral</label>
+            <input type="file" id="fotoLateral" name="fotoLateral" accept="image/*" class="input-foto" />
+        </div>
+
+        <div class="form-group">
+            <label>Foto do Painel (KM)</label>
+            <input type="file" id="fotoPainel" name="fotoPainel" accept="image/*" class="input-foto" />
+        </div>
+    </div>
+
+    <div class="form-group mt-15">
+        <label>Outras Fotos (Chassi, Motor, etc.)</label>
+        <input type="file" id="fotosExtras" name="fotosExtras" accept="image/*" multiple class="input-foto" />
+        <small class="upload-hint mt-4">Você pode selecionar várias imagens de uma vez neste campo.</small>
+    </div>
+</div>
+
       <button class="btn-enviar" onclick="enviarDados()">Enviar Dados</button>
 
     </div>

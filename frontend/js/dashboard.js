@@ -48,7 +48,6 @@ async function carregarDashboard() {
 
     // Agora NENHUMA função está faltando!
     renderizarAlertas(processos, clientes, veiculos);
-    renderizarSolicitacoes(solicitacoesPortal); 
     
   } catch (err) {
     console.error('Erro ao carregar dashboard:', err);
@@ -111,49 +110,6 @@ function renderizarAlertas(processos, clientes, veiculos) {
   }).join('');
 }
 
-function renderizarSolicitacoes(solicitacoes) {
-  const lista = document.getElementById('listaSolicitacoes');
-  if (!lista) return;
-
-  if (!solicitacoes || solicitacoes.length === 0) {
-    lista.innerHTML = '<p class="vazio">Nenhuma solicitação recente no portal.</p>';
-    return;
-  }
-
-  lista.innerHTML = solicitacoes.map(s => `
-    <div class="solicitacao-card">
-      <div class="solicitacao-info">
-        <div class="solicitacao-cliente">${s.cliente_nome || 'Novo Cliente'}</div>
-        <div class="solicitacao-data">Enviado em: ${new Date(s.criado_em).toLocaleDateString('pt-BR')}</div>
-      </div>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <button class="btn-ver-docs" onclick="verDocumentos(${s.id})">Documentos</button>
-        
-        <button class="btn-excluir-solicitacao" onclick="deletarSolicitacao(${s.id})" title="Apagar Solicitação">✕</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-// NOVO: Função para enviar o comando de apagar para o servidor
-async function deletarSolicitacao(id) {
-  if (!confirm('Tem certeza que deseja apagar esta solicitação? Os documentos anexados também serão excluídos do sistema.')) return;
-
-  try {
-    const res = await fetch(`${API}/portal/${id}`, {
-      method: 'DELETE',
-      headers: getHeaders()
-    });
-
-    if (!res.ok) throw new Error('Erro ao deletar solicitação');
-
-    // Recarrega o Dashboard para a solicitação sumir da tela na hora
-    carregarDashboard();
-  } catch (err) {
-    console.error('Erro ao excluir:', err);
-    alert('Erro ao excluir solicitação.');
-  }
-}
 
 function copiarLink() {
   const input = document.getElementById('linkGerado');

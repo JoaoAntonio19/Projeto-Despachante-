@@ -84,7 +84,9 @@ function renderizarTabela(veiculos) {
         <td>${v.ano_modelo || '--'}</td>
         <td>
           <div class="acoes">
-            <button class="btn-icone editar" title="Editar" onclick="editarVeiculo(${v.id})"><i class="ph ph-pencil-simple"></i></button>
+            <button class="btn-icone ver-ficha" title="Ver Ficha do Veículo" onclick="location.href='detalhes-veiculos.html?id=${v.id}'" style="color: #2563eb; background: #eff6ff;">
+              <i class="ph ph-car-profile"></i>
+            </button>
             <button class="btn-icone deletar" title="Excluir" onclick="deletarVeiculo(${v.id})"><i class="ph ph-trash"></i></button>
           </div>
         </td>

@@ -77,4 +77,19 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+router.get('/:id/fotos', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT pd.* FROM portal_documentos pd
+      JOIN portal_solicitacoes ps ON pd.solicitacao_id = ps.id
+      WHERE ps.veiculo_id = $1 
+      AND pd.tipo_documento NOT IN ('cnh', 'comprovante', 'comprovanteEndereco')
+    `, [req.params.id]);
+    
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});
+
 module.exports = router;

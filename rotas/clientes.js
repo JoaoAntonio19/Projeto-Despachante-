@@ -46,35 +46,15 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Criar cliente
-router.post('/', async (req, res) => {
-  const despachanteId = getDespachanteId(req);
-  if (!despachanteId) return res.status(401).json({ erro: 'Não autorizado' });
-
-  // UPDATE: Removed 'rg' and 'cep', added 'estado'
-  const { nome, cpf, telefone, email, endereco, cidade, estado } = req.body;
-  try {
-    const result = await pool.query(
-      'INSERT INTO clientes (nome, cpf, telefone, email, endereco, cidade, estado, despachante_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *',
-      [nome, cpf, telefone, email, endereco, cidade, estado, despachanteId]
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    res.status(500).json({ erro: err.message });
-  }
-});
-
-// Atualizar cliente
 router.put('/:id', async (req, res) => {
   const despachanteId = getDespachanteId(req);
   if (!despachanteId) return res.status(401).json({ erro: 'Não autorizado' });
 
-  // UPDATE: Removed 'rg' and 'cep', added 'estado'
-  const { nome, cpf, telefone, email, endereco, cidade, estado } = req.body;
+  const { nome, cpf, telefone, email, cep, endereco, cidade, estado } = req.body;
   try {
     const result = await pool.query(
-      'UPDATE clientes SET nome=$1, cpf=$2, telefone=$3, email=$4, endereco=$5, cidade=$6, estado=$7 WHERE id=$8 AND despachante_id=$9 RETURNING *',
-      [nome, cpf, telefone, email, endereco, cidade, estado, req.params.id, despachanteId]
+      'UPDATE clientes SET nome=$1, cpf=$2, telefone=$3, email=$4, cep=$5, endereco=$6, cidade=$7, estado=$8 WHERE id=$9 AND despachante_id=$10 RETURNING *',
+      [nome, cpf, telefone, email, cep, endereco, cidade, estado, req.params.id, despachanteId]
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -82,22 +62,61 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Deletar cliente
+router.post('/', async (req, res) => {
+  const despachanteId = getDespachanteId(req);
+  if (!despachanteId) return res.status(401).json({ erro: 'Não autorizado' });
+
+  const { nome, cpf, telefone, email, cep, endereco, cidade, estado } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO clientes (nome, cpf, telefone, email, cep, endereco, cidade, estado, despachante_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *',
+      [nome, cpf, telefone, email, cep, endereco, cidade, estado, despachanteId]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});
+
 router.delete('/:id', async (req, res) => {
   const despachanteId = getDespachanteId(req);
   if (!despachanteId) return res.status(401).json({ erro: 'Não autorizado' });
 
+  const clienteId = req.params.id;
+
   try {
-    await pool.query(`
-      DELETE FROM checklist_documentos 
-      WHERE processo_id IN (
-        SELECT id FROM processos WHERE cliente_id = $1 AND despachante_id = $2
-      )
-    `, [req.params.id, despachanteId]);
-    await pool.query('DELETE FROM processos WHERE cliente_id = $1 AND despachante_id = $2', [req.params.id, despachanteId]);
-    await pool.query('DELETE FROM veiculos WHERE cliente_id = $1 AND despachante_id = $2', [req.params.id, despachanteId]);
-    await pool.query('DELETE FROM clientes WHERE id = $1 AND despachante_id = $2', [req.params.id, despachanteId]);
-    res.json({ mensagem: 'Cliente e todos os dados vinculados deletados com sucesso' });
+    await pool.query('UPDATE portal_solicitacoes SET cliente_id = NULL WHERE cliente_id = $1', [clienteId]);
+
+    await pool.query('DELETE FROM veiculos WHERE cliente_id = $1', [clienteId]);
+
+    await pool.query('DELETE FROM processos WHERE cliente_id = $1', [clienteId]);
+
+    const result = await pool.query(
+      'DELETE FROM clientes WHERE id = $1 AND despachante_id = $2 RETURNING *',
+      [clienteId, despachanteId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ erro: 'Cliente não encontrado ou já deletado.' });
+    }
+
+    res.json({ mensagem: 'Cliente e todos os seus vínculos foram deletados com sucesso!' });
+  } catch (err) {
+    console.error("Erro ao deletar cliente:", err);
+    res.status(500).json({ erro: err.message });
+  }
+});
+
+router.get('/:id/documentos', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT pd.* FROM portal_documentos pd
+      JOIN portal_solicitacoes ps ON pd.solicitacao_id = ps.id
+      WHERE ps.cliente_id = $1 
+      AND pd.tipo_documento IN ('cnh', 'comprovante', 'comprovanteEndereco')
+    `, [req.params.id]);
+    
+    res.json(result.rows);
   } catch (err) {
     res.status(500).json({ erro: err.message });
   }

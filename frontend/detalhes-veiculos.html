@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha do Veículo - Despachante Guaxupé</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/detalhes-veiculos.css"> 
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">Despachante <span>Guaxupé</span></div>
+        <nav>
+            <a href="index.html"><i class="ph ph-chart-pie"></i> Dashboard</a>
+            <a href="clientes.html"><i class="ph ph-users"></i> Clientes</a>
+            <a href="veiculos.html" class="active"><i class="ph ph-car"></i> Veículos</a>
+            <a href="processos.html"><i class="ph ph-file-text"></i> Processos</a>
+            <a href="consulta.html"><i class="ph ph-magnifying-glass"></i> Consulta</a>
+        </nav>
+    </div>
+
+    <div class="main">
+        <button class="btn-voltar" onclick="history.back()">
+            <i class="ph ph-arrow-left"></i> Voltar para Lista
+        </button>
+        
+        <div class="container-ficha">
+            <div class="topo" style="margin-bottom: 20px;">
+                <div class="topo-info">
+                    <h1 id="placaVeiculoH1">Carregando...</h1>
+                    <p class="subtitulo">Ficha Cadastral do Veículo</p>
+                </div>
+            </div>
+
+            <div class="card-ficha">
+                <div class="card-header-flex">
+                    <h3><i class="ph ph-car"></i> Dados do Veículo</h3>
+                    <button class="btn-primary" onclick="abrirModalEditarVeiculo()" style="padding: 6px 12px; font-size: 13px;">
+                        <i class="ph ph-pencil-simple"></i> Editar Dados
+                    </button>
+                </div>
+                
+                <div class="dado-grid">
+                    <div class="dado-item"><label>Placa</label><span id="fichaPlaca" class="badge-placa" style="font-size: 16px;">--</span></div>
+                    <div class="dado-item"><label>Proprietário Atual</label><span id="fichaDono">--</span></div>
+                    <div class="dado-item"><label>Marca/Modelo</label><span id="fichaMarcaModelo">--</span></div>
+                    <div class="dado-item"><label>Ano (Fab/Mod)</label><span id="fichaAno">--</span></div>
+                    <div class="dado-item"><label>Renavam</label><span id="fichaRenavam">--</span></div>
+                    <div class="dado-item"><label>Chassi</label><span id="fichaChassi">--</span></div>
+                </div>
+            </div>
+
+            <div class="card-ficha" style="margin-top: 20px;">
+                <h3><i class="ph ph-camera"></i> Fotos do Carro</h3>
+                <div id="galeriaFotos" class="galeria-vazia">
+                    <i class="ph ph-image" style="font-size: 32px; color: #cbd5e1; margin-bottom: 10px;"></i>
+                    <p>O cliente ainda não enviou fotos deste veículo pelo link do portal.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalVeiculo">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Editar Veículo</h2>
+          <button class="modal-fechar" onclick="fecharModalVeiculo()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="formVeiculo">
+            <input type="hidden" id="veiculoId" />
+            <input type="hidden" id="veiculoClienteId" />
+            
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Placa</label>
+                <input type="text" id="veiculoPlaca" maxlength="7" style="text-transform: uppercase;" required />
+              </div>
+              <div class="form-group">
+                <label>Renavam</label>
+                <input type="text" id="veiculoRenavam" maxlength="11" />
+              </div>
+              <div class="form-group full">
+                <label>Chassi</label>
+                <input type="text" id="veiculoChassi" maxlength="17" style="text-transform: uppercase;" />
+              </div>
+              <div class="form-group">
+                <label>Marca</label>
+                <input type="text" id="veiculoMarca" />
+              </div>
+              <div class="form-group">
+                <label>Modelo</label>
+                <input type="text" id="veiculoModelo" />
+              </div>
+              <div class="form-group">
+                <label>Ano Fabricação</label>
+                <input type="text" id="veiculoAnoFab" maxlength="4" />
+              </div>
+              <div class="form-group">
+                <label>Ano Modelo</label>
+                <input type="text" id="veiculoAnoMod" maxlength="4" />
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-primary" onclick="salvarEdicaoVeiculo()">Salvar Alterações</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/login.js"></script>
+    <script src="js/detalhes-veiculos.js"></script>
+</body>
+</html>
