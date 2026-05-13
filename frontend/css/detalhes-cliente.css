@@ -1,0 +1,121 @@
+/* Container focado no centro da tela */
+.container-ficha {
+    max-width: 800px;
+    margin: 0 auto; /* Centraliza a div na tela */
+}
+
+/* Estilo dos Cards */
+.card-ficha {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+/* Cabeçalho tradicional do card */
+.card-ficha h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+/* NOVO: Cabeçalho com o botão de Editar do lado direito */
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.card-header-flex h3 {
+    margin: 0;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #1e293b;
+    font-size: 16px;
+}
+
+/* NOVO: Grid para os dados ficarem em 2 colunas dentro do card */
+.dado-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* Itens de Dados */
+.dado-item {
+    margin-bottom: 15px;
+}
+
+.dado-item label {
+    display: block;
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.dado-item span {
+    font-size: 15px;
+    color: #0f172a;
+    font-weight: 500;
+}
+
+/* Botão Voltar */
+.btn-voltar {
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    transition: 0.2s;
+}
+
+.btn-voltar:hover {
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+/* Botão de Procuração */
+.btn-procuracao {
+    background: #10b981;
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 15px;
+    transition: 0.2s;
+}
+
+.btn-procuracao:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
