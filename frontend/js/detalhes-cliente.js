@@ -100,49 +100,84 @@ function gerarProcuracao() {
 }
 
 async function carregarDocumentosCliente() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    const area = document.getElementById('areaDocsCliente');
+
+    if (!area) return; 
+
     try {
-        const res = await fetch(`${API}/clientes/${clienteId}/documentos`, { headers: getHeaders() });
+        const res = await fetch(`${API}/portal/buscar-avulsos?cliente_id=${id}`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+
+        if (!res.ok) throw new Error('Erro ao buscar documentos');
+
         const docs = await res.json();
-        
-        const galeria = document.getElementById('galeriaDocumentos');
-        
+
         if (docs.length === 0) {
-            galeria.innerHTML = '<p style="color: #64748b; font-size: 13px; grid-column: span 2;">Nenhum documento anexado pelo portal.</p>';
+            area.innerHTML = `
+                <div class="area-anexos-vazia">
+                    <i class="ph ph-file-text"></i>
+                    <span>Nenhum documento anexado diretamente a este cliente.</span>
+                </div>`;
             return;
         }
 
-        galeria.innerHTML = docs.map(d => {
-            const arq = d.caminho.split(/[\\/]/).pop();
-            const nomeAmigavel = d.tipo_documento === 'cnh' ? 'CNH' : 'Comprovante de Endereço';
-            
-            const isPdf = arq.toLowerCase().endsWith('.pdf');
+        area.innerHTML = docs.map(d => {
+            const caminhoPadronizado = d.caminho.replace(/\\/g, '/');
+            const nomeDoArquivo = caminhoPadronizado.split('/').pop();
+            const linkArquivo = `${window.location.origin}/uploads/${nomeDoArquivo}`;
 
-            if (isPdf) {
-                return `
-                <div style="border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; text-align: center; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <span style="display: block; font-weight: 600; font-size: 11px; color: #475569; margin-bottom: 8px; text-transform: uppercase;">${nomeAmigavel}</span>
-                    <div style="height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc; border-radius: 6px; border: 1px dashed #cbd5e1;">
-                        <i class="ph ph-file-pdf" style="font-size: 40px; color: #ef4444; margin-bottom: 10px;"></i>
-                        <a href="http://localhost:3000/uploads/${arq}" target="_blank" class="btn-primary" style="padding: 4px 12px; font-size: 11px;">Abrir PDF</a>
+            return `
+                <div style="padding: 12px 0; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">
+                        <strong style="display: block; font-size: 11px; color: #64748B; letter-spacing: 0.5px; margin-bottom: 4px;">${d.tipo_documento.toUpperCase()}</strong>
+                        <span style="font-size: 14px; color: #0F172A; font-weight: 500;">${d.nome_arquivo || nomeDoArquivo}</span>
                     </div>
-                </div>`;
-            } else {
-                // Se for Imagem (PNG, JPG), mostra a foto aberta igual no veículo
-                return `
-                <div style="border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; text-align: center; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <span style="display: block; font-weight: 600; font-size: 11px; color: #475569; margin-bottom: 8px; text-transform: uppercase;">
-                        ${nomeAmigavel}
-                    </span>
-                    <a href="http://localhost:3000/uploads/${arq}" target="_blank" title="Clique para ampliar">
-                        <img src="http://localhost:3000/uploads/${arq}" alt="${nomeAmigavel}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; transition: 0.2s;">
-                    </a>
-                </div>`;
-            }
+                    <a href="${linkArquivo}" target="_blank" class="btn-primary" style="padding: 6px 14px; font-size: 12px; text-decoration: none; border-radius: 6px;">Ver</a>
+                </div>
+            `;
         }).join('');
-        
     } catch (err) {
         console.error("Erro ao carregar documentos:", err);
-        document.getElementById('galeriaDocumentos').innerHTML = '<p style="color: red; font-size: 13px;">Erro ao carregar documentos.</p>';
+        area.innerHTML = '<p style="color: red; text-align: center;">Erro ao carregar documentos.</p>';
+    }
+}
+
+async function uploadDocumentoManual(input, tipoRef) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('documento', file);
+    formData.append('tipo_documento', 'Anexo');
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+
+    if (tipoRef === 'cliente') {
+        formData.append('cliente_id', id);
+    } else {
+        formData.append('veiculo_id', id);
+    }
+
+    try {
+        alert("Enviando arquivo...");
+        const res = await fetch(`${API}/portal/upload`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+            body: formData
+        });
+
+        if (res.ok) {
+            alert("Arquivo anexado com sucesso!");
+            window.location.reload(); 
+        } else {
+            alert("Erro ao enviar arquivo. Verifique se o backend aceita uploads sem processo.");
+        }
+    } catch (err) {
+        console.error("Erro no upload:", err);
     }
 }
 

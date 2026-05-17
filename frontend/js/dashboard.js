@@ -110,6 +110,7 @@ function renderizarAlertas(processos, clientes, veiculos) {
   }).join('');
 }
 
+
 async function carregarVistoriasHoje() {
     try {
         const res = await fetch('/api/vistorias/hoje', {
@@ -125,20 +126,34 @@ async function carregarVistoriasHoje() {
         }
 
         container.innerHTML = vistorias.map(v => `
-            <div class="item-vistoria">
-                <span class="hora">${new Date(v.data_hora).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                <div class="info">
-                    <strong>${v.cliente_nome}</strong>
-                    <span>Placa: ${v.veiculo_placa} - ${v.local_vistoria}</span>
+            <div class="item-vistoria" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px; margin-bottom: 12px;">
+                <div class="info-esq">
+                    <span class="hora" style="font-weight: bold; color: #0F172A; font-size: 14px;">
+                        ${new Date(v.data_hora).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </span>
+                    <div class="info" style="margin-top: 4px;">
+                        <strong style="display: block; font-size: 14px;">${v.cliente_nome}</strong>
+                        <span style="font-size: 13px; color: #64748B;">Placa: ${v.veiculo_placa} - ${v.local_vistoria}</span>
+                    </div>
+                    <span class="status" style="font-size: 11px; font-weight: bold; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; background-color: ${v.status === 'Pendente' ? '#FEF3C7' : (v.status === 'Concluída' ? '#D1FAE5' : '#FEE2E2')}; color: ${v.status === 'Pendente' ? '#D97706' : (v.status === 'Concluída' ? '#059669' : '#DC2626')};">
+                        ${v.status}
+                    </span>
                 </div>
-                <span class="status ${v.status.toLowerCase()}">${v.status}</span>
+                
+                <div class="acoes-dir" style="display: flex; gap: 8px;">
+                    <button onclick="mudarStatusVistoria(${v.id}, 'Concluída')" title="Marcar como Concluída" style="background: #10B981; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        <i class="ph ph-check" style="font-size: 16px;"></i>
+                    </button>
+                    <button onclick="excluirVistoria(${v.id})" title="Cancelar Vistoria" style="background: #EF4444; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        <i class="ph ph-trash" style="font-size: 16px;"></i>
+                    </button>
+                </div>
             </div>
         `).join('');
     } catch (err) {
         console.error("Erro ao carregar vistorias:", err);
     }
 }
-
 
 
 function copiarLink() {
@@ -333,6 +348,47 @@ async function verDocumentos(id) {
 }
 
 function fecharModalDocs() { document.getElementById('modalDocs')?.classList.remove('ativo'); }
+
+// -------------------------------------------------------------
+// FUNÇÕES DE AÇÃO DAS VISTORIAS (EXCLUIR E MUDAR STATUS)
+// -------------------------------------------------------------
+async function excluirVistoria(id) {
+    if(!confirm('Tem certeza que deseja cancelar e excluir esta vistoria?')) return;
+    
+    try {
+        const res = await fetch(`/api/vistorias/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        if(res.ok) {
+            carregarVistoriasHoje(); // Atualiza a lista na hora
+        } else {
+            alert('Erro ao cancelar a vistoria.');
+        }
+    } catch(err) {
+        console.error("Erro ao excluir:", err);
+    }
+}
+
+async function mudarStatusVistoria(id, novoStatus) {
+    try {
+        const res = await fetch(`/api/vistorias/${id}/status`, {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}` 
+            },
+            body: JSON.stringify({ status: novoStatus })
+        });
+        if(res.ok) {
+            carregarVistoriasHoje(); // Atualiza a lista e a cor da tag!
+        } else {
+            alert('Erro ao atualizar o status.');
+        }
+    } catch(err) {
+        console.error("Erro ao mudar status:", err);
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     if(typeof carregarVistoriasHoje === 'function') carregarVistoriasHoje();

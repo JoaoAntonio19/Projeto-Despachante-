@@ -34,3 +34,31 @@ router.post('/', async (req, res) => {
 });
 
 module.exports = router;
+
+router.delete('/:id', async (req, res) => {
+  try {
+    // Apaga apenas se a vistoria pertencer ao despachante logado
+    const result = await pool.query(
+      'DELETE FROM vistorias WHERE id = $1 AND despachante_id = $2 RETURNING *', 
+      [req.params.id, req.user.id]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ erro: 'Vistoria não encontrada.' });
+    res.json({ mensagem: 'Vistoria excluída com sucesso' });
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});
+
+router.put('/:id/status', async (req, res) => {
+  const { status } = req.body;
+  try {
+    const result = await pool.query(
+      'UPDATE vistorias SET status = $1 WHERE id = $2 AND despachante_id = $3 RETURNING *', 
+      [status, req.params.id, req.user.id]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ erro: 'Vistoria não encontrada.' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});

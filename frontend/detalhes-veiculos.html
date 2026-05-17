@@ -51,13 +51,23 @@
                 </div>
             </div>
 
-            <div class="card-ficha" style="margin-top: 20px;">
-                <h3><i class="ph ph-camera"></i> Fotos do Carro</h3>
-                <div id="galeriaFotos" class="galeria-vazia">
-                    <i class="ph ph-image" style="font-size: 32px; color: #cbd5e1; margin-bottom: 10px;"></i>
-                    <p>O cliente ainda não enviou fotos deste veículo pelo link do portal.</p>
+            <div class="card-anexos">
+            <div class="header-anexos-secao">
+                <div class="header-titulo">
+                    <i class="ph ph-camera icon-anexo"></i>
+                    <strong>Fotos do Carro</strong>
                 </div>
+                <label for="uploadDocVeiculo" class="label-upload-manual">+ Adicionar</label>
+                <input type="file" id="uploadDocVeiculo" class="input-escondido" onchange="uploadDocumentoManual(this, 'veiculo')">
             </div>
+
+            <div id="areaFotosVeiculo">
+                <div class="area-anexos-vazia">
+                    <i class="ph ph-image"></i>
+                    <span>O cliente ainda não enviou fotos deste veículo.</span>
+                </div>
+             </div>
+           </div>
         </div>
     </div>
 

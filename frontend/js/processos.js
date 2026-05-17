@@ -76,7 +76,6 @@ function renderizarTabela(processos) {
     const veiculo = todosVeiculos.find(v => v.id === p.veiculo_id);
     const statusClass = p.status || 'aberto';
     
-    // --- SUA CALCULADORA DE PRAZO ---
     let prazoTexto = '--';
     if (p.data_vencimento) {
       const vencimento = new Date(p.data_vencimento.split('T')[0] + 'T00:00:00');
@@ -106,11 +105,8 @@ function renderizarTabela(processos) {
         <td><span class="badge-status ${statusClass}">${p.status || 'Aberto'}</span></td>
         <td>
           <div class="acoes">
-            <button class="btn-icone pdf" title="Gerar Procuração" onclick="gerarPDF(${p.id})">PDF</button>
-            <button class="btn-icone checklist" title="Verificar Documentos" onclick="abrirChecklist(${p.id})">CHECKLIST</button>
+            <a href="detalhes-processo.html?id=${p.id}" class="btn-icone checklist" title="Abrir Detalhes" style="text-decoration: none; display: inline-block; text-align: center;">DETALHES</a>
             
-            <button class="btn-icone editar" title="Editar" onclick="editarProcesso(${p.id})"><i class="ph ph-pencil-simple"></i></button>
-            <button class="btn-icone deletar" title="Excluir" onclick="deletarProcesso(${p.id})"><i class="ph ph-trash"></i></button>
           </div>
         </td>
       </tr>
@@ -194,7 +190,6 @@ async function deletarProcesso(id) {
   }
 }
 
-// --- FUNÇÕES DO MODAL DE CHECKLIST ---
 function fecharModalChecklist() {
     document.getElementById('modalChecklist').classList.remove('ativo');
 }
@@ -213,7 +208,6 @@ async function abrirChecklist(processoId) {
         const solicitacaoDoProcesso = solicitacoes.find(s => s.processo_id === processoId);
 
         if (!solicitacaoDoProcesso) {
-            // AGORA SIM, HTML LIMPO SEM CSS MISTURADO!
             lista.innerHTML = `
                 <div class="checklist-vazio">
                     <p>⚠️ Nenhuma solicitação de portal vinculada a este processo.</p>
@@ -253,7 +247,6 @@ async function abrirChecklist(processoId) {
     }
 }
 
-// --- FUNÇÕES DE GERAR LINK DO PROCESSO ---
 async function gerarLinkProcesso(processoId) {
   try {
     const res = await fetch(`${API}/portal/gerar-link`, {
@@ -288,5 +281,16 @@ function copiarLink() {
   msg.style.display = 'block';
   setTimeout(() => { msg.style.display = 'none'; }, 2000);
 }
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await carregarDados();
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const idParaEditar = urlParams.get('editar');
+    
+    if (idParaEditar) {
+        editarProcesso(parseInt(idParaEditar));
+    }
+});
 
 document.addEventListener('DOMContentLoaded', carregarDados);

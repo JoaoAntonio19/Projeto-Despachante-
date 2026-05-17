@@ -183,7 +183,6 @@ router.get('/documentos/:solicitacao_id', async (req, res) => {
   }
 });
 
-// Excluir solicitação e seus documentos
 router.delete('/:id', async (req, res) => {
   try {
     await pool.query('DELETE FROM portal_documentos WHERE solicitacao_id = $1', [req.params.id]);
@@ -192,6 +191,98 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ erro: err.message });
   }
+});
+
+router.post('/upload', upload.single('documento'), async (req, res) => {
+    const despachanteId = getDespachanteId(req);
+    if (!despachanteId) return res.status(401).json({ erro: 'Não autorizado' });
+
+    const file = req.file;
+    if (!file) return res.status(400).json({ erro: 'Nenhum arquivo enviado.' });
+
+    const { processo_id, cliente_id, veiculo_id, tipo_documento } = req.body;
+
+    try {
+        if (processo_id) {
+            let solResult = await pool.query('SELECT id FROM portal_solicitacoes WHERE processo_id = $1', [processo_id]);
+            let solicitacaoId;
+
+            if (solResult.rows.length === 0) {
+                const novaSol = await pool.query(
+                    'INSERT INTO portal_solicitacoes (token, processo_id, status, despachante_id) VALUES ($1, $2, $3, $4) RETURNING id',
+                    [crypto.randomBytes(10).toString('hex'), processo_id, 'concluido', despachanteId]
+                );
+                solicitacaoId = novaSol.rows[0].id;
+            } else {
+                solicitacaoId = solResult.rows[0].id;
+            }
+
+            await pool.query(
+                'INSERT INTO portal_documentos (solicitacao_id, tipo_documento, nome_arquivo, caminho) VALUES ($1, $2, $3, $4)',
+                [solicitacaoId, tipo_documento || 'Anexo', file.originalname, file.path]
+            );
+
+        } 
+        else if (cliente_id || veiculo_id) {
+            const novaSol = await pool.query(
+                'INSERT INTO portal_solicitacoes (token, cliente_id, veiculo_id, status, despachante_id, nome_cliente) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+                [crypto.randomBytes(10).toString('hex'), cliente_id || null, veiculo_id || null, 'concluido', despachanteId, 'Upload Avulso']
+            );
+
+            await pool.query(
+                'INSERT INTO portal_documentos (solicitacao_id, tipo_documento, nome_arquivo, caminho) VALUES ($1, $2, $3, $4)',
+                [novaSol.rows[0].id, tipo_documento || 'Anexo', file.originalname, file.path]
+            );
+        } else {
+            return res.status(400).json({ erro: 'É necessário informar um processo, cliente ou veículo para anexar.' });
+        }
+
+        res.json({ sucesso: true, mensagem: 'Arquivo enviado com sucesso!' });
+    } catch (err) {
+        console.error("Erro no upload interno:", err.message);
+        res.status(500).json({ erro: err.message });
+    }
+});
+
+router.get('/buscar-avulsos', async (req, res) => {
+    const { cliente_id, veiculo_id } = req.query;
+    try {
+        let query = `
+            SELECT pd.* FROM portal_documentos pd
+            JOIN portal_solicitacoes ps ON pd.solicitacao_id = ps.id
+            WHERE ps.processo_id IS NULL
+        `;
+        const values = [];
+
+        if (cliente_id) {
+            values.push(cliente_id);
+            query += ` AND ps.cliente_id = $${values.length}`;
+        } else if (veiculo_id) {
+            values.push(veiculo_id);
+            query += ` AND ps.veiculo_id = $${values.length}`;
+        } else {
+            return res.json([]);
+        }
+
+        const result = await pool.query(query, values);
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
+});
+
+router.get('/documentos/processo/:processo_id', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT pd.* FROM portal_documentos pd
+             JOIN portal_solicitacoes ps ON pd.solicitacao_id = ps.id
+             WHERE ps.processo_id = $1`,
+            [req.params.processo_id]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
 });
 
 module.exports = router;

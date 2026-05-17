@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detalhes do Processo - Despachante Guaxupé</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/processos.css" />
+  <link rel="stylesheet" href="css/detalhes-processo.css" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="logo">Despachante<span>Guaxupé</span></div>
+    <nav>
+      <a href="index.html"><i class="ph ph-chart-pie"></i> Dashboard</a>
+      <a href="clientes.html"><i class="ph ph-users"></i> Clientes</a>
+      <a href="veiculos.html"><i class="ph ph-car"></i> Veículos</a>
+      <a href="processos.html" class="active"><i class="ph ph-file-text"></i> Processos</a>
+      <a href="consulta.html"><i class="ph ph-magnifying-glass"></i> Consulta</a>
+    </nav>
+  </div>
+
+  <div class="main">
+    <div class="topo topo-detalhes">
+      <div class="topo-info">
+        <a href="processos.html" class="btn-voltar-caixa">&larr; Voltar para Lista</a>        <h1 id="tituloProcesso" style="margin: 8px 0 4px 0;">Carregando Processo...</h1>
+        <p class="subtitulo" id="subtituloProcesso" style="margin: 0;">Cliente: -- | Placa: --</p>
+      </div>
+      
+      <div class="acoes-topo">
+        <button class="btn-acao btn-editar" onclick="editarProcesso()">
+          <i class="ph ph-pencil-simple"></i> Editar
+        </button>
+        <button class="btn-acao btn-excluir" onclick="excluirProcessoAtual()">
+          <i class="ph ph-trash"></i> Excluir
+        </button>
+        <button class="btn-acao btn-pdf" onclick="gerarProcuracaoPDF()">
+          <i class="ph ph-file-pdf"></i> PDF
+        </button>
+        <button class="btn-acao btn-concluir" onclick="concluirProcesso()">
+          <i class="ph ph-check-circle"></i> Concluir
+        </button>
+      </div>
+    </div>
+
+    <div class="dashboard-grid grid-detalhes">
+      
+      <div class="section section-checklist">
+        <div class="section-header">
+          <h2> Checklist de Documentos</h2>
+        </div>
+        <div class="conteudo-checklist" id="areaChecklist">
+          <p class="vazio">Carregando checklist...</p>
+        </div>
+      </div>
+
+      <div class="card-anexos" style="margin-top: 0;">
+        <div class="header-anexos-secao">
+            <div class="header-titulo">
+                <i class="ph ph-paperclip icon-anexo"></i>
+                <strong>Anexos do Processo</strong>
+            </div>
+            <label for="uploadDoc" class="label-upload-manual">+ Adicionar</label>
+            <input type="file" id="uploadDoc" class="input-escondido" onchange="uploadDocumentoManual(this)">
+        </div>
+        
+        <div id="areaDocumentos">
+            <div class="area-anexos-vazia">
+                <i class="ph ph-file-dashed"></i>
+                <span>Nenhum documento anexado ainda.</span>
+            </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<div class="modal-overlay" id="modalProcessoEdit">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Editar Processo</h2>
+        <button class="modal-fechar" onclick="fecharModalProcessoEdit()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="formProcessoEdit">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Cliente</label>
+              <select id="editProcessoCliente" required></select>
+            </div>
+            <div class="form-group">
+              <label>Veículo</label>
+              <select id="editProcessoVeiculo" required></select>
+            </div>
+            <div class="form-group">
+              <label>Tipo de Processo</label>
+              <select id="editProcessoTipo" required>
+                <option value="transferencia">Transferência</option>
+                <option value="licenciamento">Licenciamento</option>
+                <option value="multa">Multa</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Data de Abertura</label>
+              <input type="date" id="editProcessoDataAbertura" required />
+            </div>
+            <div class="form-group">
+              <label>Data de Vencimento</label>
+              <input type="date" id="editProcessoDataVencimento" />
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="editProcessoStatus" required>
+                <option value="aberto">Aberto</option>
+                <option value="em_andamento">Em Andamento</option>
+                <option value="concluido">Concluído</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label>Observações</label>
+              <textarea id="editProcessoObservacoes" rows="3"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" onclick="salvarProcessoEdicao()">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/detalhes-processo.js"></script>
+</body>
+</html>

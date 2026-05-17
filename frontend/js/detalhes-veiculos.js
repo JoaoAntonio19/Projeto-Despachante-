@@ -100,43 +100,84 @@ async function salvarEdicaoVeiculo() {
 }
 
 async function carregarFotosVeiculo() {
-    try {
-        const res = await fetch(`${API}/veiculos/${veiculoId}/fotos`, { headers: getHeaders() });
-        const fotos = await res.json();
-        
-        const galeria = document.getElementById('galeriaFotos');
-        
-        if (fotos.length === 0) return; 
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    const area = document.getElementById('areaFotosVeiculo');
 
-        galeria.className = 'dado-grid'; 
-        
-        galeria.innerHTML = fotos.map(f => {
-            const arq = f.caminho.split(/[\\/]/).pop();
-            
-            const nomesBacaninhas = {
-                'crv': 'CRV / Documento',
-                'fotoFrente': 'Foto da Frente',
-                'fotoTraseira': 'Foto da Traseira',
-                'fotoLateral': 'Foto Lateral',
-                'fotoPainel': 'Painel (KM)',
-                'fotosExtras': 'Foto Extra'
-            };
-            const nomeExibicao = nomesBacaninhas[f.tipo_documento] || 'Foto Anexada';
+    if (!area) return; 
+
+    try {
+        const res = await fetch(`${API}/portal/buscar-avulsos?veiculo_id=${id}`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+
+        if (!res.ok) throw new Error('Erro ao buscar fotos');
+
+        const docs = await res.json();
+
+        if (docs.length === 0) {
+            area.innerHTML = `
+                <div class="area-anexos-vazia">
+                    <i class="ph ph-image"></i>
+                    <span>O cliente ainda não enviou fotos deste veículo.</span>
+                </div>`;
+            return;
+        }
+
+        area.innerHTML = docs.map(d => {
+            const caminhoPadronizado = d.caminho.replace(/\\/g, '/');
+            const nomeDoArquivo = caminhoPadronizado.split('/').pop();
+            const linkArquivo = `${window.location.origin}/uploads/${nomeDoArquivo}`;
 
             return `
-            <div style="border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; text-align: center; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <span style="display: block; font-weight: 600; font-size: 11px; color: #475569; margin-bottom: 8px; text-transform: uppercase;">
-                    ${nomeExibicao}
-                </span>
-                <a href="http://localhost:3000/uploads/${arq}" target="_blank" title="Clique para ampliar">
-                    <img src="http://localhost:3000/uploads/${arq}" alt="${nomeExibicao}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; transition: 0.2s;">
-                </a>
-            </div>`;
+                <div style="margin-bottom: 8px; padding: 10px; border: 1px solid #E2E8F0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; background: #F8FAFC;">
+                    <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">
+                        <strong style="display: block; font-size: 11px; color: #64748B;">${d.tipo_documento.toUpperCase()}</strong>
+                        <span style="font-size: 13px; color: #0F172A;">${d.nome_arquivo || nomeDoArquivo}</span>
+                    </div>
+                    <a href="${linkArquivo}" target="_blank" class="btn-primary" style="padding: 4px 10px; font-size: 12px; text-decoration: none;">Ver</a>
+                </div>
+            `;
         }).join('');
-        
     } catch (err) {
-        console.error("Erro ao carregar fotos do veículo:", err);
-        document.getElementById('galeriaFotos').innerHTML = '<p style="color: red; font-size: 13px;">Erro ao carregar fotos.</p>';
+        console.error("Erro ao carregar fotos:", err);
+        area.innerHTML = '<p style="color: red; text-align: center;">Erro ao carregar fotos.</p>';
+    }
+}
+
+async function uploadDocumentoManual(input, tipoRef) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('documento', file);
+    formData.append('tipo_documento', 'Anexo');
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+
+    if (tipoRef === 'cliente') {
+        formData.append('cliente_id', id);
+    } else {
+        formData.append('veiculo_id', id);
+    }
+
+    try {
+        alert("Enviando arquivo...");
+        const res = await fetch(`${API}/portal/upload`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+            body: formData
+        });
+
+        if (res.ok) {
+            alert("Arquivo anexado com sucesso!");
+            window.location.reload(); 
+        } else {
+            alert("Erro ao enviar arquivo. Verifique se o backend aceita uploads sem processo.");
+        }
+    } catch (err) {
+        console.error("Erro no upload:", err);
     }
 }
 

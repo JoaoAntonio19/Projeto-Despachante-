@@ -1,0 +1,115 @@
+.topo-detalhes {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; 
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.acoes-topo {
+  display: flex;
+  align-items: center; 
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-acao {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  height: fit-content; 
+  transition: background-color 0.2s;
+}
+
+.btn-editar { background-color: #2563EB; }
+.btn-editar:hover { background-color: #1D4ED8; }
+
+.btn-excluir { background-color: #EF4444; }
+.btn-excluir:hover { background-color: #DC2626; }
+
+.btn-pdf { background-color: #2563EB; }
+.btn-pdf:hover { background-color: #1D4ED8; }
+
+.btn-concluir { background-color: #10B981; }
+.btn-concluir:hover { background-color: #059669; }
+
+.grid-detalhes {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr; 
+  gap: 24px;
+  align-items: start; 
+}
+
+.section-checklist, .section-anexos {
+  margin-bottom: 0;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.conteudo-checklist, .conteudo-anexos {
+  padding: 20px;
+}
+
+.header-anexos {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label-upload {
+  cursor: pointer;
+  color: #2563EB;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.label-upload:hover {
+  text-decoration: underline;
+}
+
+.input-escondido {
+  display: none;
+}
+
+.vazio-pequeno {
+  text-align: center;
+  font-size: 13px;
+  color: #64748B;
+}
+
+@media (max-width: 900px) {
+  .grid-detalhes {
+    grid-template-columns: 1fr;
+  }
+}
+
+.btn-voltar-caixa {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background-color: transparent;
+  border: 1px solid #CBD5E1; 
+  border-radius: 6px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+
+.btn-voltar-caixa:hover {
+  background-color: #F8FAFC;
+  border-color: #94A3B8;
+  color: #0F172A;
+}

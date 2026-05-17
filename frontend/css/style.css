@@ -606,4 +606,126 @@ tbody tr:hover {
     to { transform: rotate(360deg); }
 }
 
+/* Cabeçalho da seção de anexos (Clientes e Veículos) */
+.header-anexos-secao {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #E2E8F0;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
 
+.header-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-titulo strong {
+    color: #0F172A;
+}
+
+.icon-anexo {
+    font-size: 18px;
+    color: #64748B;
+}
+
+.label-upload-manual {
+    cursor: pointer;
+    color: #2563EB;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.label-upload-manual:hover {
+    text-decoration: underline;
+}
+
+.input-escondido {
+    display: none;
+}
+
+.area-anexos-vazia {
+    border: 2px dashed #CBD5E1;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    background-color: #F8FAFC;
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.area-anexos-vazia i {
+    display: block;
+    font-size: 32px;
+    color: #CBD5E1;
+    margin-bottom: 8px;
+}
+
+.area-anexos-vazia span {
+    color: #64748B;
+    font-size: 14px;
+}
+
+.card-anexos {
+    background-color: #ffffff;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    margin-top: 24px;
+}
+
+.modal-qr-body {
+    text-align: center;
+}
+
+.modal-qr-texto {
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.modal-qr-container {
+    margin: 20px auto;
+    padding: 10px;
+    background: white;
+    display: inline-block;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.modal-qr-img {
+    width: 150px;
+    height: 150px;
+    display: none;
+}
+
+.modal-qr-input-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.modal-qr-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #f8fafc;
+}
+
+.modal-qr-btn {
+    white-space: nowrap;
+}
+
+.modal-qr-sucesso {
+    display: none;
+    color: #16a34a;
+    font-size: 12px;
+    margin-top: 8px;
+    font-weight: bold;
+}

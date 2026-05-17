@@ -208,8 +208,7 @@
       document.getElementById('modalProcesso').classList.remove('ativo');
     }
 
-    // Fechar menu ao clicar fora
-    document.addEventListener('click', (e) => {
+      document.addEventListener('click', (e) => {
       const menu = document.getElementById('profileMenu');
       const btn = document.querySelector('.profile-btn');
       if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {

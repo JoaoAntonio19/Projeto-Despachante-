@@ -49,12 +49,23 @@
                 </div>
             </div>
 
-           <div class="card-ficha" style="margin-top: 20px;">
-                <h3><i class="ph ph-folder-open"></i> Documentos Anexados</h3>
-                <div id="galeriaDocumentos" class="dado-grid">
-                    <p style="color: #64748b; font-size: 13px;">Buscando documentos...</p>
+         <div class="card-anexos">
+            <div class="header-anexos-secao">
+                <div class="header-titulo">
+                    <i class="ph ph-folder icon-anexo"></i>
+                    <strong>Documentos Anexados</strong>
+                </div>
+                <label for="uploadDocCliente" class="label-upload-manual">+ Adicionar</label>
+                <input type="file" id="uploadDocCliente" class="input-escondido" onchange="uploadDocumentoManual(this, 'cliente')">
+            </div>
+
+            <div id="areaDocsCliente">
+                <div class="area-anexos-vazia">
+                    <i class="ph ph-file-text"></i>
+                    <span>Nenhum documento anexado diretamente a este cliente.</span>
                 </div>
             </div>
+        </div>
         </div>  
     </div>
 
