@@ -68,6 +68,11 @@ async function gerarLinkPortal() {
     const linkCompleto = `${window.location.origin}/portal-cliente.html?token=${dados.token}`;
 
     document.getElementById('linkGerado').value = linkCompleto;
+    
+    const qrImg = document.getElementById('qrCodePortal');
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkCompleto)}`;
+    qrImg.style.display = 'block';
+
     document.getElementById('modalLink').classList.add('ativo');
   } catch (err) {
     console.error(err);

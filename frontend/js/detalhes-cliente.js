@@ -14,7 +14,6 @@ async function carregarFichaCompleta() {
     }
     
     try {
-        // Busca apenas os clientes agora
         const resClientes = await fetch(`${API}/clientes`, { headers: getHeaders() });
         const clientes = await resClientes.json();
 
@@ -24,7 +23,6 @@ async function carregarFichaCompleta() {
             return;
         }
 
-        // Preencher Tela
         document.getElementById('nomeClienteH1').textContent = clienteAtual.nome;
         document.getElementById('fichaCpf').textContent = clienteAtual.cpf || 'Não informado';
         document.getElementById('fichaTelefone').textContent = clienteAtual.telefone || 'Não informado';
@@ -39,8 +37,6 @@ async function carregarFichaCompleta() {
         console.error("Erro ao carregar dados:", err);
     }
 }
-
-// ---- FUNÇÕES DE EDIÇÃO ----
 
 function abrirModalEditar() {
     if (!clienteAtual) return;
@@ -87,7 +83,6 @@ async function salvarEdicao() {
         }
 
         fecharModalCliente();
-        // Recarrega a ficha na hora para mostrar os dados atualizados!
         carregarFichaCompleta(); 
         
     } catch (err) {
@@ -115,7 +110,9 @@ async function carregarDocumentosCliente() {
 
         const docs = await res.json();
 
-        if (docs.length === 0) {
+        const docsFiltrados = docs.filter(d => !d.tipo_documento.toLowerCase().includes('foto'));
+
+        if (docsFiltrados.length === 0) {
             area.innerHTML = `
                 <div class="area-anexos-vazia">
                     <i class="ph ph-file-text"></i>
@@ -124,7 +121,7 @@ async function carregarDocumentosCliente() {
             return;
         }
 
-        area.innerHTML = docs.map(d => {
+        area.innerHTML = docsFiltrados.map(d => {
             const caminhoPadronizado = d.caminho.replace(/\\/g, '/');
             const nomeDoArquivo = caminhoPadronizado.split('/').pop();
             const linkArquivo = `${window.location.origin}/uploads/${nomeDoArquivo}`;

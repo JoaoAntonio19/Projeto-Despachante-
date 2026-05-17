@@ -46,7 +46,6 @@ async function carregarFichaVeiculo() {
 }
 
 // ---- FUNÇÕES DE EDIÇÃO ----
-
 function abrirModalEditarVeiculo() {
     if (!veiculoAtual) return;
     
@@ -115,7 +114,13 @@ async function carregarFotosVeiculo() {
 
         const docs = await res.json();
 
-        if (docs.length === 0) {
+        // FILTRO MÁGICO DO VEÍCULO: Remove CNH, Comprovante e CRV (Deixa só as fotos)
+        const docsFiltrados = docs.filter(d => {
+            const tipo = d.tipo_documento.toLowerCase();
+            return tipo !== 'cnh' && tipo !== 'comprovante' && tipo !== 'crv';
+        });
+
+        if (docsFiltrados.length === 0) {
             area.innerHTML = `
                 <div class="area-anexos-vazia">
                     <i class="ph ph-image"></i>
@@ -124,18 +129,19 @@ async function carregarFotosVeiculo() {
             return;
         }
 
-        area.innerHTML = docs.map(d => {
+        // Layout limpo e moderno, igual o do cliente
+        area.innerHTML = docsFiltrados.map(d => {
             const caminhoPadronizado = d.caminho.replace(/\\/g, '/');
             const nomeDoArquivo = caminhoPadronizado.split('/').pop();
             const linkArquivo = `${window.location.origin}/uploads/${nomeDoArquivo}`;
 
             return `
-                <div style="margin-bottom: 8px; padding: 10px; border: 1px solid #E2E8F0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; background: #F8FAFC;">
-                    <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">
-                        <strong style="display: block; font-size: 11px; color: #64748B;">${d.tipo_documento.toUpperCase()}</strong>
-                        <span style="font-size: 13px; color: #0F172A;">${d.nome_arquivo || nomeDoArquivo}</span>
+                <div style="padding: 12px 0; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">
+                        <strong style="display: block; font-size: 11px; color: #64748B; letter-spacing: 0.5px; margin-bottom: 4px;">${d.tipo_documento.toUpperCase()}</strong>
+                        <span style="font-size: 14px; color: #0F172A; font-weight: 500;">${d.nome_arquivo || nomeDoArquivo}</span>
                     </div>
-                    <a href="${linkArquivo}" target="_blank" class="btn-primary" style="padding: 4px 10px; font-size: 12px; text-decoration: none;">Ver</a>
+                    <a href="${linkArquivo}" target="_blank" class="btn-primary" style="padding: 6px 14px; font-size: 12px; text-decoration: none; border-radius: 6px;">Ver</a>
                 </div>
             `;
         }).join('');

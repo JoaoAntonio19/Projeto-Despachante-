@@ -178,5 +178,21 @@ async function deletarCliente(id) {
   }
 }
 
-// Carrega clientes ao abrir a página
+document.getElementById('searchClientes')?.addEventListener('input', function(e) {
+    const termo = e.target.value.toLowerCase();
+    const linhas = document.querySelectorAll('#tabelaClientes tr');
+
+    linhas.forEach(linha => {
+        if (linha.querySelector('.vazio')) return; 
+
+        const textoLinha = linha.textContent.toLowerCase();
+
+        if (textoLinha.includes(termo)) {
+            linha.style.display = '';
+        } else {
+            linha.style.display = 'none';
+        }
+    });
+});
+
 document.addEventListener('DOMContentLoaded', carregarClientes);

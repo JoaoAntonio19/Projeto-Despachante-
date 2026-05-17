@@ -293,4 +293,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+document.getElementById('searchProcessos')?.addEventListener('input', function(e) {
+    const termo = e.target.value.toLowerCase();
+    const linhas = document.querySelectorAll('#tabelaProcessos tr');
+
+    linhas.forEach(linha => {
+        if (linha.querySelector('.vazio')) return; 
+
+        const textoLinha = linha.textContent.toLowerCase();
+
+        if (textoLinha.includes(termo)) {
+            linha.style.display = '';
+        } else {
+            linha.style.display = 'none';
+        }
+    });
+});
+
 document.addEventListener('DOMContentLoaded', carregarDados);

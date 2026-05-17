@@ -174,5 +174,21 @@ async function deletarVeiculo(id) {
   }
 }
 
-// Altera a inicialização para chamar a função que carrega veículos + clientes
+document.getElementById('searchVeiculos')?.addEventListener('input', function(e) {
+    const termo = e.target.value.toLowerCase();
+    const linhas = document.querySelectorAll('#tabelaVeiculos tr');
+
+    linhas.forEach(linha => {
+        if (linha.querySelector('.vazio')) return; 
+
+        const textoLinha = linha.textContent.toLowerCase();
+
+        if (textoLinha.includes(termo)) {
+            linha.style.display = '';
+        } else {
+            linha.style.display = 'none';
+        }
+    });
+});
+
 document.addEventListener('DOMContentLoaded', carregarDadosVeiculos);

@@ -39,8 +39,13 @@ async function carregarTela() {
         const cliente = clientesGlobais.find(c => c.id == processoAtual.cliente_id) || { nome: 'Desconhecido' };
         const veiculo = veiculosGlobais.find(v => v.id == processoAtual.veiculo_id) || { placa: 'Desconhecida' };
 
-        document.getElementById('tituloProcesso').textContent = `Processo #${processoAtual.id} - ${(processoAtual.tipo || 'Serviço').toUpperCase()}`;
+        document.getElementById('tituloProcesso').textContent = `Processo - ${(processoAtual.tipo || 'Serviço').toUpperCase()}`;
         document.getElementById('subtituloProcesso').textContent = `Cliente: ${cliente.nome} | Placa: ${veiculo.placa}`;
+
+        const elObs = document.getElementById('textoObservacoes');
+        if (elObs) {
+            elObs.textContent = processoAtual.observacoes || 'Nenhuma observação cadastrada para este processo.';
+        }
 
         await carregarDocumentos();
         await carregarChecklistSeguro();
@@ -83,9 +88,11 @@ async function carregarChecklistSeguro() {
         }).join('');
     }
 }
+
 async function atualizarChecklistDB(itemId, concluido) {
     try { await fetch(`${API}/checklist/${itemId}`, { method: 'PUT', headers: { ...getHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ concluido }) }); } catch(err) {}
 }
+
 function salvarChecklistMock(index, isChecked) {
     const key = `checklist_mock_${processoId}`;
     let salvos = JSON.parse(localStorage.getItem(key)) || {};
@@ -95,11 +102,38 @@ function salvarChecklistMock(index, isChecked) {
 
 async function carregarDocumentos() {
     const area = document.getElementById('areaDocumentos');
-    try {
-        const res = await fetch(`${API}/portal/documentos/processo/${processoId}`, { headers: getHeaders() });
-        const docs = await res.json();
+    if (!area) return;
 
-        if (!Array.isArray(docs) || docs.length === 0) {
+    try {
+        const reqs = [ fetch(`${API}/portal/documentos/processo/${processoId}`, { headers: getHeaders() }) ];
+        
+        if (processoAtual.cliente_id) {
+            reqs.push(fetch(`${API}/portal/buscar-avulsos?cliente_id=${processoAtual.cliente_id}`, { headers: getHeaders() }));
+        }
+
+        const respostas = await Promise.all(reqs);
+        let todosDocs = [];
+
+        for (let res of respostas) {
+            if (res.ok) {
+                const dados = await res.json();
+                todosDocs = todosDocs.concat(dados);
+            }
+        }
+
+        const docsUnicos = [];
+        const caminhosVistos = new Set();
+        
+        for (const d of todosDocs) {
+            if (d.caminho && !caminhosVistos.has(d.caminho)) {
+                caminhosVistos.add(d.caminho);
+                docsUnicos.push(d);
+            }
+        }
+
+        const docsSemCarro = docsUnicos.filter(d => !d.tipo_documento.toLowerCase().includes('foto'));
+
+        if (docsSemCarro.length === 0) {
             area.innerHTML = `
                 <div class="area-anexos-vazia">
                     <i class="ph ph-file-dashed"></i>
@@ -108,7 +142,7 @@ async function carregarDocumentos() {
             return;
         }
 
-        area.innerHTML = docs.map(d => {
+        area.innerHTML = docsSemCarro.map(d => {
             const caminhoPadronizado = d.caminho.replace(/\\/g, '/');
             const nomeDoArquivo = caminhoPadronizado.split('/').pop();
             const linkArquivo = `${window.location.origin}/uploads/${nomeDoArquivo}`;
@@ -202,12 +236,15 @@ function fecharModalProcessoEdit() {
 }
 
 async function salvarProcessoEdicao() {
+    const valDataAbertura = document.getElementById('editProcessoDataAbertura').value;
+    const valDataVencimento = document.getElementById('editProcessoDataVencimento').value;
+
     const dados = {
         cliente_id: parseInt(document.getElementById('editProcessoCliente').value),
         veiculo_id: parseInt(document.getElementById('editProcessoVeiculo').value),
         tipo: document.getElementById('editProcessoTipo').value,
-        data_abertura: document.getElementById('editProcessoDataAbertura').value,
-        data_vencimento: document.getElementById('editProcessoDataVencimento').value,
+        data_abertura: valDataAbertura ? valDataAbertura : null,
+        data_vencimento: valDataVencimento ? valDataVencimento : null,
         status: document.getElementById('editProcessoStatus').value,
         observacoes: document.getElementById('editProcessoObservacoes').value,
     };

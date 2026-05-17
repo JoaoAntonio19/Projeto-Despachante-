@@ -119,18 +119,22 @@
         <h2>Link Gerado!</h2>
         <button class="modal-fechar" onclick="fecharModalLink()">&times;</button>
       </div>
-      <div class="modal-body">
-        <p style="color:#64748B; font-size:13px; margin-bottom:16px;">
-          Copie o link abaixo e envie para o cliente via WhatsApp.
-        </p>
-        <div class="link-box">
-          <input type="text" id="linkGerado" readonly />
-          <button class="btn-copiar" onclick="copiarLink()">Copiar</button>
-        </div>
-        <div id="linkCopiado" style="display:none; color:#166534; font-size:13px; margin-top:8px; font-weight:500;">
-          Link copiado com sucesso!
-        </div>
+      <div class="modal-body modal-qr-body">
+      <p class="modal-qr-texto">
+        Peça para o cliente escanear o código abaixo ou envie o link via WhatsApp.
+      </p>
+      
+      <div class="modal-qr-container">
+        <img id="qrCodePortal" class="modal-qr-img" src="" alt="QR Code do Portal">
       </div>
+
+      <div class="modal-qr-input-group">
+        <input type="text" id="linkGerado" class="modal-qr-input" readonly />
+        <button class="btn-primary modal-qr-btn" onclick="copiarLink()">Copiar o Link</button>
+      </div>
+      
+      <p id="linkCopiado" class="modal-qr-sucesso">✅ Link copiado para a área de transferência!</p>
+    </div>
       <div class="modal-footer">
         <button class="btn-primary" onclick="fecharModalLink()">Fechar</button>
       </div>
