@@ -1,6 +1,4 @@
-const API = 'http://localhost:3000/api';
-
-// Funções de autenticação (iguais às das outras telas)
+const API = '/api';
 function getToken() {
   return localStorage.getItem('token');
 }

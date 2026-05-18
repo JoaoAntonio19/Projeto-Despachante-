@@ -1,4 +1,4 @@
-const API = 'http://localhost:3000/api';
+const API = '/api';
 const urlParams = new URLSearchParams(window.location.search);
 const processoId = urlParams.get('id');
 

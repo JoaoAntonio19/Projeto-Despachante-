@@ -6,7 +6,7 @@ async function fazerLogin(event) {
   const erro = document.getElementById('mensagemErro');
 
   try {
-    const response = await fetch('http://localhost:3000/api/auth/login', { // Adicionei a URL completa igual aos outros arquivos por segurança
+    const response = await fetch('/api/auth/login', { // Adicionei a URL completa igual aos outros arquivos por segurança
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, senha })
