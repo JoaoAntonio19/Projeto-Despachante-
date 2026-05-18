@@ -4,7 +4,6 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const path = require('path');
 const db = require('./database');
 const rotasVistorias = require('./rotas/vistorias');
@@ -29,21 +28,41 @@ function autenticar(req, res, next) {
   }
 }
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  family: 4,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  tls: {
-    rejectUnauthorized: false 
-  }
-});
+const enviarEmailBrevo = async (emailCliente, assunto, conteudoHtml) => {
+  const url = 'https://api.brevo.com/v3/smtp/email';
+  
+  const options = {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'content-type': 'application/json',
+      'api-key': process.env.BREVO_API_KEY
+    },
+    body: JSON.stringify({
+      sender: {
+        name: "Despachante Guaxupé",
+        email: process.env.EMAIL_USER
+      },
+      to: [
+        { email: emailCliente }
+      ],
+      subject: assunto,
+      htmlContent: conteudoHtml
+    })
+  };
 
-// ─── Rotas de autenticação ────────────────────────────────────────────────────
+  const response = await fetch(url, options);
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("Erro detalhado do Brevo:", errorData);
+    throw new Error('Falha ao enviar email pela API do Brevo');
+  }
+  
+  return await response.json();
+};
+
+
 app.post('/api/auth/cadastro', async (req, res) => {
   const { nome, email, confirmarEmail, telefone, senha } = req.body;
   if (!nome || !email || !confirmarEmail || !telefone || !senha)
@@ -73,7 +92,6 @@ app.post('/api/auth/cadastro', async (req, res) => {
 
       const link = `${process.env.BASE_URL}/verificar-email.html?token=${token_confirmacao}`;
       
-      // ─── TEMPLATE DE EMAIL PROFISSIONAL ───
       const htmlEmail = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; padding: 40px 0;">
         <table align="center" border="0" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden;">
@@ -110,12 +128,7 @@ app.post('/api/auth/cadastro', async (req, res) => {
       </div>
       `;
 
-      await transporter.sendMail({
-        from: `"Despachante Guaxupé" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: 'Confirme seu email - Despachante Guaxupé',
-        html: htmlEmail
-      });
+      await enviarEmailBrevo(email, 'Confirme seu email - Despachante Guaxupé', htmlEmail);
 
       await client.query('COMMIT');
       return res.status(201).json({ mensagem: 'Cadastro efetuado. Verifique seu email para confirmar.' });
@@ -198,6 +211,5 @@ app.use('/api/checklist', autenticar, rotasChecklist);
 app.use('/api/pdf',       autenticar, rotasPdf);
 app.use('/api/portal',    rotasPortal); 
 
-// ─── Start ────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
