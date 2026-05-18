@@ -6,7 +6,6 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 
-// Função para ler a imagem e transformar em Base64 (para embutir no PDF)
 function getLogoBase64() {
     try {
         // Tenta achar a logo na pasta public
@@ -135,7 +134,10 @@ router.get('/procuracao/:processoId', async (req, res) => {
       </html>
     `;
 
-    const browser = await puppeteer.launch({ headless: 'new' });
+    const browser = await puppeteer.launch({ 
+    headless: 'new',
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+     });
     const page = await browser.newPage();
     await page.setContent(html);
     const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
