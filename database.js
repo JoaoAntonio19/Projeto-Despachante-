@@ -8,6 +8,10 @@ const pool = new Pool({
   }
 });
 
+pool.on('error', (err) => {
+  console.error('Conexão ociosa perdida com o banco:', err.message);
+});
+
 pool.connect()
   .then(() => console.log('Base de dados conectada na Nuvem (Neon)! 🎉'))
   .catch(err => console.error('Erro ao conectar na base de dados:', err.message));
